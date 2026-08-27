@@ -10,3 +10,5 @@ class Loggedin extends LoginState {
   LoginUserEntities user;
   Loggedin(this.user);
 }
+
+class SigningOut extends LoginState {}

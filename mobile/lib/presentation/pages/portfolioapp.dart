@@ -23,6 +23,8 @@ class _PortfolioappState extends State<Portfolioapp> {
             context,
             MaterialPageRoute(builder: (_) => Loginpage()),
           );
+        } else if (state is SigningOut) {
+          Scaffold(body: CircularProgressIndicator());
         }
       },
       builder: (context, state) {
@@ -77,14 +79,14 @@ class _PortfolioappState extends State<Portfolioapp> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Image.network(state.user.photoUrl),
+                              Image.network(state.user.photoUrl!),
                               SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(state.user.name),
-                                  Text(state.user.googleId),
-                                  Text(state.user.email),
+                                  Text(state.user.name!),
+                                  Text(state.user.googleId!),
+                                  Text(state.user.email!),
                                 ],
                               ),
                             ],

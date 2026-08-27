@@ -6,17 +6,16 @@ import 'package:portfolioapp/services/auth_service.dart';
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final auth = Authservice();
   LoginBloc() : super(Initial()) {
-    on<DoLogin>((event, emit) {
+    on<DoLogin>((event, emit) async {
       emit(Logging());
       final auth = Authservice();
-      final user = auth.login();
-      if (user != null) {
-        emit(Loggedin(user));
-      }
+      final user = await auth.login();
+      emit(Loggedin(user));
     });
-    on<DoLogout>((event, emit) {
+    on<DoLogout>((event, emit) async {
+      emit(SigningOut());
       final auth = Authservice();
-      auth.logout();
+      await auth.logout();
       emit(Initial());
     });
   }

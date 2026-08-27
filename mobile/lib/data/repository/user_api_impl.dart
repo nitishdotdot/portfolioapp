@@ -10,14 +10,10 @@ class UserApiImpl implements UserApi {
     final dio = Dio();
     String path = dotenv.get('BACKEND_URL');
     final String path1 = '$path/user';
-    print(path1);
     final responce = await dio.get(path1);
-    print('dio responce is ');
-    print(responce);
     final user = (responce.data as List)
         .map((x) => UserEntities.fromjson(x))
         .toList();
-    print(user);
     return Serviceresponce(user: user, statuscode: 200, message: "ok");
   }
 }
