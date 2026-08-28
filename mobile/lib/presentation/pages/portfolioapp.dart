@@ -4,6 +4,7 @@ import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Portfolioapp extends StatefulWidget {
   const Portfolioapp({super.key});
@@ -24,7 +25,16 @@ class _PortfolioappState extends State<Portfolioapp> {
             MaterialPageRoute(builder: (_) => Loginpage()),
           );
         } else if (state is SigningOut) {
-          Scaffold(body: CircularProgressIndicator());
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return LoadingAnimationWidget.flickr(
+                leftDotColor: Colors.red,
+                rightDotColor: Colors.blueGrey,
+                size: 40,
+              );
+            },
+          );
         }
       },
       builder: (context, state) {
@@ -147,20 +157,6 @@ class _PortfolioappState extends State<Portfolioapp> {
                           child: Column(children: [ 
                   ],
                 ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: h * 0.1,
-                        child: BottomAppBar(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              FloatingActionButton(
-                                onPressed: () {},
-                                child: Text('a'),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],

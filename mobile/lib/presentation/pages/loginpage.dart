@@ -6,6 +6,7 @@ import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'package:portfolioapp/presentation/widget/footer.dart';
 import 'package:portfolioapp/presentation/widget/header.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -32,7 +33,13 @@ class _LoginpageState extends State<Loginpage> {
           } else if (state is Logging) {
             showDialog(
               context: context,
-              builder: (_) => AlertDialog(content: CircularProgressIndicator()),
+              builder: (BuildContext context) {
+                return LoadingAnimationWidget.flickr(
+                  leftDotColor: Colors.red,
+                  rightDotColor: Colors.blueGrey,
+                  size: 40,
+                );
+              },
             );
           }
         },
