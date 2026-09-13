@@ -1,10 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:async';
 import 'package:portfolioapp/domain/entities/login_user_entities.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Authservice {
   Authservice._();

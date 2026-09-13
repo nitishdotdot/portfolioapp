@@ -4,6 +4,7 @@ import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
+import 'package:portfolioapp/presentation/pages/signup.dart';
 import 'package:portfolioapp/presentation/widget/footer.dart';
 import 'package:portfolioapp/presentation/widget/header.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -125,6 +126,30 @@ class _LoginpageState extends State<Loginpage> {
                                 context.read<LoginBloc>().add(DoLogin());
                               },
                               child: Image.asset('assets/google.png'),
+                            ),
+                            SizedBox(height: 15),
+                            Divider(thickness: 2),
+                            SizedBox(height: 15),
+
+                            GestureDetector(
+                              onTap: () => Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => Signup()),
+                              ),
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'dont have an account ',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                    TextSpan(
+                                      text: 'signup',
+                                      style: TextStyle(color: Colors.blue),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ],
                         ),

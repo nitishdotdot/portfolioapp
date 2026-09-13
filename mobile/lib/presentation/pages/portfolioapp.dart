@@ -154,7 +154,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                     children: [
                       Expanded(
                         child: SingleChildScrollView(
-                          child: Column(children: [ 
+                          child: Column(children: [
                   ],
                 ),
                         ),

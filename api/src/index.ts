@@ -29,6 +29,10 @@ app.post("/user", async (req, res) => {
       res.send(req.body);
     }
   }
+  else
+  {
+     res.send("wrong body");
+  }
 });
 app.post("/scrip", async (req, res) => {
   const data = req.body;
