@@ -18,6 +18,7 @@ model user {
   email String @unique
   googleId String
   photoUrl String
+  password String
   scrips scrip[]
 }
 

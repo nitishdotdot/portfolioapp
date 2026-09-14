@@ -1,5 +1,6 @@
 import express, { response } from "express";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 const app = express();
@@ -22,16 +23,32 @@ app.post("/user", async (req, res) => {
           email: email,
           photoUrl: photoUrl,
           googleId: googleId,
+          password: "",
         },
       });
       res.send(user);
     } catch {
       res.send(req.body);
     }
+  } else {
+    res.send("wrong body");
   }
-  else
-  {
-     res.send("wrong body");
+});
+app.post("/signup", async (req, res) => {
+  const data = req.body;
+  if (data.email && data.password && data.name) {
+    await prisma.user.create({
+      data: {
+        name: data.name,
+        email: data.email,
+        password: await bcrypt.hash(data.password, 10),
+        photoUrl: "",
+        googleId: "",
+      },
+    });
+    res.send(req.body);
+  } else {
+    res.send("wrong body");
   }
 });
 app.post("/scrip", async (req, res) => {

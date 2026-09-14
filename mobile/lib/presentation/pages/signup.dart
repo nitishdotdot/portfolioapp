@@ -26,6 +26,8 @@ class _SignupState extends State<Signup> {
                   children: [
                     Text('SIGNUP'),
                     TextField(controller: name),
+                    TextField(controller: email),
+                    ElevatedButton(onPressed: () {}, child: Text('ok')),
                   ],
                 ),
               ),
