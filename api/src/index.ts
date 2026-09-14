@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
+import { brotliDecompressSync } from "node:zlib";
 const app = express();
 dotenv.config();
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
@@ -49,6 +50,20 @@ app.post("/signup", async (req, res) => {
     res.send(req.body);
   } else {
     res.send("wrong body");
+  }
+});
+app.post("/signin", async (req, res) => {
+  const data = req.body;
+  if (data.email && data.password) {
+    const user = await prisma.user.findUnique({ where: { email: data.email } });
+    if (!user) {
+      res.send("notok");
+    } else {
+      const x = await bcrypt.compare(data.password, user.password);
+      if (x) {
+        res.send("ok");
+      } else res.send("notok");
+    }
   }
 });
 app.post("/scrip", async (req, res) => {

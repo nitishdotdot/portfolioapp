@@ -1,4 +1,4 @@
 abstract class AuthApi {
-  Future<bool> signInApi();
+  Future<bool> signInApi(String email, String password);
   Future<bool> signUpApi(String name, String email, String password);
 }

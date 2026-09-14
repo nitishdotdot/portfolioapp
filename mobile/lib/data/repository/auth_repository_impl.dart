@@ -4,14 +4,14 @@ import 'package:portfolioapp/domain/repository/auth_repository.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
   @override
-  Future<bool> signIn() async {
+  Future<bool> signIn(String email, String password) async {
     AuthApi authapi = AuthApiImpl();
-    return await authapi.signInApi();
+    return await authapi.signInApi(email, password);
   }
 
   @override
   Future<bool> signUp(String name, String email, String password) async {
     AuthApi authapi = AuthApiImpl();
-    return await authapi.signUpApi();
+    return await authapi.signUpApi(name, email, password);
   }
 }

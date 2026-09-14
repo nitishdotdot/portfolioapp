@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:portfolioapp/data/datasource/remote/auth_api_impl.dart';
+import 'package:portfolioapp/domain/api/auth_api.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
@@ -113,12 +115,35 @@ class _LoginpageState extends State<Loginpage> {
                             ),
                             SizedBox(height: 15),
                             FloatingActionButton(
-                              onPressed: () => {},
-                              child: Icon(Icons.forward),
+                              onPressed: () async {
+                                AuthApi authApi = AuthApiImpl();
+                                final isValidated = await authApi.signInApi(
+                                  email.text,
+                                  password.text,
+                                );
+                                if (context.mounted) {
+                                  if (isValidated) {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => Portfolioapp(),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('wrong credentials'),
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+
                               backgroundColor: Colors.green,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadiusGeometry.circular(24),
                               ),
+                              child: Icon(Icons.forward),
                             ),
                             SizedBox(height: 15),
                             FloatingActionButton(

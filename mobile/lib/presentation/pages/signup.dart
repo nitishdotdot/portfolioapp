@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
+import 'package:portfolioapp/domain/repository/auth_repository.dart';
+import 'package:portfolioapp/presentation/pages/loginpage.dart';
+import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'package:portfolioapp/presentation/widget/header.dart';
 import 'package:portfolioapp/presentation/widget/footer.dart';
 
@@ -10,9 +14,12 @@ class Signup extends StatefulWidget {
 }
 
 class _SignupState extends State<Signup> {
-  TextEditingController? name;
-  TextEditingController? email;
-  TextEditingController? password;
+  TextEditingController name = TextEditingController();
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+  String? name1;
+  String? email1;
+  String? password1;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,9 +32,35 @@ class _SignupState extends State<Signup> {
                 child: Column(
                   children: [
                     Text('SIGNUP'),
-                    TextField(controller: name),
-                    TextField(controller: email),
-                    ElevatedButton(onPressed: () {}, child: Text('ok')),
+                    TextFormField(
+                      controller: name,
+                      decoration: InputDecoration(),
+                    ),
+                    TextFormField(controller: email),
+                    TextFormField(controller: password),
+                    ElevatedButton(
+                      onPressed: () async {
+                        AuthRepository authRepository = AuthRepositoryImpl();
+                        final response = await authRepository.signUp(
+                          name.text,
+                          email.text,
+                          password.text,
+                        );
+                        if (context.mounted) {
+                          if (response == true) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (_) => Loginpage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('error in signup')),
+                            );
+                          }
+                        }
+                      },
+                      child: Text('ok'),
+                    ),
                   ],
                 ),
               ),
