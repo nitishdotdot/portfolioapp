@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:portfolioapp/data/datasource/remote/auth_api_impl.dart';
+import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';
+import 'package:portfolioapp/domain/repository/auth_repository.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
@@ -147,8 +149,29 @@ class _LoginpageState extends State<Loginpage> {
                             ),
                             SizedBox(height: 15),
                             FloatingActionButton(
-                              onPressed: () {
-                                context.read<LoginBloc>().add(DoLogin());
+                              onPressed: () async {
+                                // context.read<LoginBloc>().add(DoLogin());
+                                AuthRepository authRepository =
+                                    AuthRepositoryImpl();
+                                final response = await authRepository
+                                    .googleSignin();
+                                if (context.mounted) {
+                                  if (response == true) {
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (_) => Portfolioapp(),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'error in google sign in',
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
                               },
                               child: Image.asset('assets/google.png'),
                             ),

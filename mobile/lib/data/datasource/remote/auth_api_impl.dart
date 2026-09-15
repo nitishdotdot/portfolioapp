@@ -2,22 +2,23 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthApiImpl extends AuthApi {
+  // AuthApiImpl._();
+  // static final AuthApiImpl _authApi = AuthApiImpl._();
+  // factory AuthApiImpl() => _authApi;
+  final GoogleSignIn googleSignIn = GoogleSignIn.instance;
   @override
   Future<bool> signInApi(String email, String password) async {
     try {
       Dio dio = Dio();
       final url = dotenv.get('BACKEND_URL');
-      print('----------');
-      print('$email  $password');
       final response = await dio.post(
         '$url/signin',
         data: {'email': email, 'password': password},
       );
       if (response.statusCode == 200) {
-        print('-------------------------');
-        print(response);
         if (response.data == "ok") {
           return true;
         } else {
@@ -51,5 +52,48 @@ class AuthApiImpl extends AuthApi {
     } catch (e) {
       return false;
     }
+  }
+
+  @override
+  Future<bool> googleSigninApi() async {
+    try {
+      final clientId = dotenv.get('CLIENT_ID');
+      final serverclientId = dotenv.get('SERVER_ID');
+
+      await googleSignIn.initialize(
+        clientId: clientId,
+        serverClientId: serverclientId,
+      );
+      final user = await googleSignIn.authenticate();
+      Dio dio = Dio();
+      String backendUrl = dotenv.get('BACKEND_URL');
+      final response = await dio.post(
+        '$backendUrl/googlesignin',
+        data: {
+          'name': user.displayName,
+          'email': user.email,
+          'googleId': user.id,
+          'photoUrl': user.photoUrl,
+          'idToken': user.authentication.idToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        if (response.data == "ok") {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('error encountered in catch $e');
+      return false;
+    }
+  }
+
+  @override
+  Future<void> googleSignoutApi() async {
+    await googleSignIn.signOut();
   }
 }

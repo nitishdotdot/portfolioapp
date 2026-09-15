@@ -14,4 +14,16 @@ class AuthRepositoryImpl extends AuthRepository {
     AuthApi authapi = AuthApiImpl();
     return await authapi.signUpApi(name, email, password);
   }
+
+  @override
+  Future<bool> googleSignin() async {
+    AuthApi authApi = AuthApiImpl();
+    return await authApi.googleSigninApi();
+  }
+
+  @override
+  Future<void> googleSignOut() async {
+    AuthApi authApi = AuthApiImpl();
+    await authApi.googleSignoutApi();
+  }
 }
