@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
+import jwt from "jsonwebtoken";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -26,9 +27,11 @@ app.post("/googlesignin", async (req, res) => {
   });
   if (name && email && googleId && photoUrl && idToken) {
     try {
-      if (!tokenResponse["payload"]["email_verifies"]) res.send("notok");
-      if ((await prisma.user.findUnique({ where: { email: email } })) != null) {
-        res.send("ok");
+      if (!tokenResponse["payload"]["email_verified"]) res.sendStatus(404);
+      const person = await prisma.user.findUnique({ where: { email: email } });
+      if (person != null) {
+        const token = jwt.sign(person, process.env.JWT_SECRET!);
+        res.send(token);
       }
       const user = await prisma.user.create({
         data: {
@@ -39,12 +42,13 @@ app.post("/googlesignin", async (req, res) => {
           idToken: idToken,
         },
       });
-      res.send("ok");
-    } catch {
-      res.send("notok");
+      const token = jwt.sign(user, process.env.JWT_SECRET!);
+      res.send(token);
+    } catch (e) {
+      res.sendStatus(400);
     }
   } else {
-    res.send("notok");
+    res.sendStatus(404);
   }
 });
 app.post("/signup", async (req, res) => {
@@ -57,23 +61,26 @@ app.post("/signup", async (req, res) => {
         password: await bcrypt.hash(data.password, 10),
       },
     });
-    res.send(req.body);
+    res.sendStatus(200);
   } else {
-    res.send("wrong body");
+    res.sendStatus(400);
   }
 });
 app.post("/signin", async (req, res) => {
   const data = req.body;
   if (data.email && data.password) {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
-    if (!user) {
-      res.send("notok");
+    if (user == null) {
+      res.sendStatus(404);
     } else {
-      const x = await bcrypt.compare(data.password, user.password);
+      const token = jwt.sign(user, process.env.JWT_SECRET!);
+      const x = await bcrypt.compare(data.password, user.password!);
       if (x) {
-        res.send("ok");
-      } else res.send("notok");
+        res.send(token);
+      } else res.sendStatus(400);
     }
+  } else {
+    res.sendStatus(400);
   }
 });
 app.post("/scrip", async (req, res) => {

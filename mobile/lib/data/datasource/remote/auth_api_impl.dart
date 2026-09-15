@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -19,11 +18,7 @@ class AuthApiImpl extends AuthApi {
         data: {'email': email, 'password': password},
       );
       if (response.statusCode == 200) {
-        if (response.data == "ok") {
-          return true;
-        } else {
-          return false;
-        }
+        return true;
       } else {
         return false;
       }
@@ -43,10 +38,8 @@ class AuthApiImpl extends AuthApi {
         options: Options(),
       );
       if (response.statusCode == 200) {
-        debugPrint(response.statusMessage);
         return true;
       } else {
-        debugPrint(response.statusMessage);
         return false;
       }
     } catch (e) {
@@ -78,11 +71,7 @@ class AuthApiImpl extends AuthApi {
         },
       );
       if (response.statusCode == 200) {
-        if (response.data == "ok") {
-          return true;
-        } else {
-          return false;
-        }
+        return true;
       } else {
         return false;
       }
