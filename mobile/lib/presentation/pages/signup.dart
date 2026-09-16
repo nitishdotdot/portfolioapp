@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/repository/auth_repository.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
@@ -40,7 +41,7 @@ class _SignupState extends State<Signup> {
                     TextFormField(controller: password),
                     ElevatedButton(
                       onPressed: () async {
-                        AuthRepository authRepository = AuthRepositoryImpl();
+                        final authRepository = s1<AuthRepository>();
                         final response = await authRepository.signUp(
                           name.text,
                           email.text,

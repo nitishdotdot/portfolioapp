@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/repository/auth_repository.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
@@ -48,9 +49,16 @@ class _PortfolioappState extends State<Portfolioapp> {
                                   Text('Are you sure'),
                                   ElevatedButton(
                                     onPressed: () {
-                                      AuthRepository authRepository =
-                                          AuthRepositoryImpl();
-                                      authRepository.googleSignOut();
+                                      final authrepo = s1<AuthRepository>();
+                                      authrepo.googleSignOut();
+                                      if (context.mounted) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => Loginpage(),
+                                          ),
+                                        );
+                                      }
                                     },
                                     child: Text('ok'),
                                   ),

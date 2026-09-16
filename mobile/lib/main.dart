@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:portfolioapp/core/di/injection_container.dart' as d;
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  d.init();
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
   runApp(const MyApp());

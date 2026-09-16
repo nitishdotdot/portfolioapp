@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/datasource/remote/auth_api_impl.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';
@@ -151,8 +152,7 @@ class _LoginpageState extends State<Loginpage> {
                             FloatingActionButton(
                               onPressed: () async {
                                 // context.read<LoginBloc>().add(DoLogin());
-                                AuthRepository authRepository =
-                                    AuthRepositoryImpl();
+                                final authRepository = s1<AuthRepository>();
                                 final response = await authRepository
                                     .googleSignin();
                                 if (context.mounted) {

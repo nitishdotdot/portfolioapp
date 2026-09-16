@@ -4,9 +4,6 @@ import 'package:portfolioapp/domain/api/auth_api.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthApiImpl extends AuthApi {
-  // AuthApiImpl._();
-  // static final AuthApiImpl _authApi = AuthApiImpl._();
-  // factory AuthApiImpl() => _authApi;
   final GoogleSignIn googleSignIn = GoogleSignIn.instance;
   @override
   Future<bool> signInApi(String email, String password) async {
@@ -76,7 +73,6 @@ class AuthApiImpl extends AuthApi {
         return false;
       }
     } catch (e) {
-      print('error encountered in catch $e');
       return false;
     }
   }
