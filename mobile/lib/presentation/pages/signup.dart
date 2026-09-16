@@ -18,6 +18,7 @@ class _SignupState extends State<Signup> {
   TextEditingController name = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  bool isobsured = true;
   String? name1;
   String? email1;
   String? password1;
@@ -29,40 +30,93 @@ class _SignupState extends State<Signup> {
           children: [
             SizedBox(child: Header()),
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Text('SIGNUP'),
-                    TextFormField(
-                      controller: name,
-                      decoration: InputDecoration(),
-                    ),
-                    TextFormField(controller: email),
-                    TextFormField(controller: password),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final authRepository = s1<AuthRepository>();
-                        final response = await authRepository.signUp(
-                          name.text,
-                          email.text,
-                          password.text,
-                        );
-                        if (context.mounted) {
-                          if (response == true) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => Loginpage()),
+              child: Padding(
+                padding: EdgeInsetsGeometry.fromLTRB(10, 0, 10, 10),
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Text(
+                          'SIGNUP',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          controller: name,
+                          decoration: InputDecoration(
+                            labelText: 'name...',
+                            prefixIcon: Icon(Icons.person),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          controller: email,
+
+                          decoration: InputDecoration(
+                            labelText: 'email...',
+                            prefixIcon: Icon(Icons.email),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          obscureText: isobsured,
+                          controller: password,
+                          decoration: InputDecoration(
+                            labelText: 'password...',
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isobsured = !isobsured;
+                                });
+                              },
+                              icon: isobsured
+                                  ? Icon(Icons.visibility)
+                                  : Icon(Icons.visibility_off),
+                            ),
+                            prefixIcon: Icon(Icons.password),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final authRepository = s1<AuthRepository>();
+                            final response = await authRepository.signUp(
+                              name.text,
+                              email.text,
+                              password.text,
                             );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('error in signup')),
-                            );
-                          }
-                        }
-                      },
-                      child: Text('ok'),
+                            if (context.mounted) {
+                              if (response == true) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => Loginpage(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('error in signup')),
+                                );
+                              }
+                            }
+                          },
+                          child: Text('ok'),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
