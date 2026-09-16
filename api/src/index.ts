@@ -5,6 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
+import { stringify } from "node:querystring";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -27,11 +28,15 @@ app.post("/googlesignin", async (req, res) => {
   });
   if (name && email && googleId && photoUrl && idToken) {
     try {
-      if (!tokenResponse["payload"]["email_verified"]) res.sendStatus(404);
+      if (!tokenResponse["payload"]["email_verified"]) {
+        res.sendStatus(404);
+        return;
+      }
       const person = await prisma.user.findUnique({ where: { email: email } });
       if (person != null) {
         const token = jwt.sign(person, process.env.JWT_SECRET!);
         res.send(token);
+        return;
       }
       const user = await prisma.user.create({
         data: {
@@ -72,6 +77,7 @@ app.post("/signin", async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email: data.email } });
     if (user == null) {
       res.sendStatus(404);
+      return;
     } else {
       const token = jwt.sign(user, process.env.JWT_SECRET!);
       const x = await bcrypt.compare(data.password, user.password!);
@@ -83,29 +89,55 @@ app.post("/signin", async (req, res) => {
     res.sendStatus(400);
   }
 });
-app.post("/scrip", async (req, res) => {
-  const data = req.body;
-  if (
-    data.name &&
-    data.userid &&
-    data.buyprice &&
-    data.kitta &&
-    data.buydate &&
-    data.selldate
-  ) {
-    await prisma.scrip.create({
-      data: {
-        name: data.name,
-        userid: data.userid,
-        buyprice: data.buyprice,
-        kitta: data.kitta,
-        buydate: data.buydate,
-        selldate: data.selldate,
-      },
+app.post("/postscrip", async (req, res) => {
+  try {
+    const jwtToken = req.headers["authorization"]?.split(" ")[1];
+    if (jwtToken == null) {
+      res.status(400).send("require token");
+      return;
+    }
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
+    console.log(decoded);
+    const data = req.body;
+    if (
+      data.name &&
+      data.buyprice &&
+      data.kitta &&
+      data.buydate &&
+      data.selldate
+    ) {
+      await prisma.scrip.create({
+        data: {
+          name: data.name,
+          userid: Number((decoded as any).id),
+          buyprice: data.buyprice,
+          kitta: data.kitta,
+          buydate: data.buydate,
+          selldate: data.selldate,
+        },
+      });
+      res.send("done");
+    } else {
+      res.send("wrong body");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
+app.get("/getscrip", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) res.status(404).send("provide token");
+    const jwToken = (header as any).split(" ")[1];
+    const decoded = jwt.verify(jwToken, process.env.JWT_SECRET!.toString());
+    const id = (decoded as any).id;
+    const user = await prisma.user.findMany({
+      where: { id: id },
+      include: { scrips: true },
     });
-    res.send("done");
-  } else {
-    res.send("wrong body");
+    res.send(user);
+  } catch (e) {
+    res.status(400).send("invalid token");
   }
 });
 app.get("/user", async (req, res) => {
