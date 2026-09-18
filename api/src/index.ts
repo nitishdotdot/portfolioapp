@@ -89,7 +89,7 @@ app.post("/signin", async (req, res) => {
     res.sendStatus(400);
   }
 });
-app.post("/postscrip", async (req, res) => {
+app.post("/buyscrip", async (req, res) => {
   try {
     const jwtToken = req.headers["authorization"]?.split(" ")[1];
     if (jwtToken == null) {
@@ -97,23 +97,18 @@ app.post("/postscrip", async (req, res) => {
       return;
     }
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
-    console.log(decoded);
+
     const data = req.body;
-    if (
-      data.name &&
-      data.buyprice &&
-      data.kitta &&
-      data.buydate &&
-      data.selldate
-    ) {
+    if (data.name && data.buyprice && data.kitta && data.buydatetime) {
       await prisma.scrip.create({
         data: {
           name: data.name,
           userid: Number((decoded as any).id),
           buyprice: data.buyprice,
           kitta: data.kitta,
-          buydate: data.buydate,
-          selldate: data.selldate,
+          buydatetime: data.buydate,
+          selldatetime: "",
+          sellprice: "",
         },
       });
       res.send("done");
@@ -124,25 +119,42 @@ app.post("/postscrip", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
-app.get("/getscrip", async (req, res) => {
+
+app.get("/user", async (req, res) => {
   try {
     const header = req.headers["authorization"];
-    if (header == null) res.status(404).send("provide token");
-    const jwToken = (header as any).split(" ")[1];
-    const decoded = jwt.verify(jwToken, process.env.JWT_SECRET!.toString());
-    const id = (decoded as any).id;
-    const user = await prisma.user.findMany({
-      where: { id: id },
-      include: { scrips: true },
-    });
-    res.send(user);
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const email = (decoded as any).email;
+    try {
+      const response = await prisma.user.findUnique({
+        where: { email: email },
+        select: {
+          name: true,
+          email: true,
+          scrips: {
+            select: {
+              name: true,
+              kitta: true,
+              buyprice: true,
+              buydatetime: true,
+              selldatetime: true,
+              sellprice: true,
+            },
+          },
+        },
+      });
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
   } catch (e) {
     res.status(400).send("invalid token");
   }
-});
-app.get("/user", async (req, res) => {
-  const email = req.body.email;
-  const response = await prisma.user.findMany({ where: { email: email } });
-  res.send(response);
 });
 app.use((req, res) => res.send("route not found"));

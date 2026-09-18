@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
+import 'package:portfolioapp/data/datasource/local/localstorage.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/repository/auth_repository.dart';
+import 'package:portfolioapp/domain/repository/user_repository.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
@@ -17,6 +19,7 @@ class Portfolioapp extends StatefulWidget {
 }
 
 class _PortfolioappState extends State<Portfolioapp> {
+  String? token;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,9 +120,19 @@ class _PortfolioappState extends State<Portfolioapp> {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(child: Column(children: [
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        final userrepo = s1<UserRepository>();
+                        await userrepo.userData();
+                      },
+                      child: Text('user'),
+                    ),
                   ],
-                )),
+                ),
+              ),
             ),
           ],
         ),

@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:portfolioapp/core/di/injection_container.dart';
+import 'package:portfolioapp/data/datasource/local/localstorage.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -15,6 +17,8 @@ class AuthApiImpl extends AuthApi {
         data: {'email': email, 'password': password},
       );
       if (response.statusCode == 200) {
+        final localstorage = s1<Localstorage>();
+        await localstorage.saveToken(response.data);
         return true;
       } else {
         return false;
@@ -68,6 +72,8 @@ class AuthApiImpl extends AuthApi {
         },
       );
       if (response.statusCode == 200) {
+        final localstorage = s1<Localstorage>();
+        await localstorage.saveToken(response.data);
         return true;
       } else {
         return false;

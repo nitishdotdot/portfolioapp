@@ -28,8 +28,9 @@ model scrip {
   name     String
   userid   Int
   buyprice Int
+  sellprice Int
   kitta    Int
-  buydate  DateTime
-  selldate DateTime
+  buydatetime  DateTime
+  selldatetime DateTime
   relation user     @relation(fields: [userid], references: [id])
 }
