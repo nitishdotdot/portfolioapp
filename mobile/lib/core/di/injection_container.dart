@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
 import 'package:portfolioapp/data/datasource/remote/auth_api_impl.dart';
 import 'package:portfolioapp/data/datasource/remote/user_api_impl.dart';
+import 'package:portfolioapp/data/models/user_model.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/data/repository/user_repository_impl.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';

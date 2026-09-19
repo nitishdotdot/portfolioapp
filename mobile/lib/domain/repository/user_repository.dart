@@ -1,3 +1,5 @@
+import 'package:portfolioapp/data/models/user_model.dart';
+
 abstract class UserRepository {
-  Future<void> userData();
+  Future<UserModel> userData();
 }

@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
+import 'package:portfolioapp/data/models/scrip_model.dart';
+import 'package:portfolioapp/data/models/user_model.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
+import 'package:portfolioapp/domain/api/user_api.dart';
 import 'package:portfolioapp/domain/repository/auth_repository.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
+import 'package:portfolioapp/main.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:portfolioapp/presentation/pages/profile_page.dart';
+import 'package:portfolioapp/presentation/widget/card.dart';
 
 class Portfolioapp extends StatefulWidget {
   const Portfolioapp({super.key});
@@ -19,13 +26,38 @@ class Portfolioapp extends StatefulWidget {
 }
 
 class _PortfolioappState extends State<Portfolioapp> {
+  final userApi = s1<UserApi>();
   String? token;
+  String? email;
+  int? l;
+  String? name;
+  List<ScripModel> scrips = [];
+  @override
+  void initState() {
+    super.initState();
+    getUerData();
+  }
+
+  void getUerData() async {
+    final userrepo = s1<UserRepository>();
+    UserModel userModel = await userrepo.userData();
+    setState(() {
+      email = userModel.email;
+      name = userModel.name;
+      scrips = userModel.scrip;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final s = MediaQuery.of(context).size;
+    final w = s.width;
+    final h = s.height;
+    int currentIndex = 0;
     return Scaffold(
-      appBar: AppBar(title: Text('WELCOME')),
+      appBar: AppBar(),
       drawer: Drawer(
-        width: MediaQuery.of(context).size.width,
+        width: w * .9,
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsetsGeometry.fromLTRB(10, 40, 0, 40),
@@ -87,8 +119,19 @@ class _PortfolioappState extends State<Portfolioapp> {
                   ],
                 ),
                 Divider(thickness: 2),
+                ListTile(
+                  onTap: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => ProfilePage(),
+                    ),
+                  ),
+                  leading: Icon(Icons.person),
+                  title: Text('$name'),
+                  subtitle: Text('$email'),
+                ),
+                Divider(thickness: 2),
                 Align(alignment: Alignment.topLeft, child: Text('Seetings')),
-                ListTile(leading: Icon(Icons.person), title: Text('profile')),
                 ListTile(leading: Icon(Icons.settings), title: Text('setting')),
                 Divider(thickness: 2),
                 Align(
@@ -120,22 +163,63 @@ class _PortfolioappState extends State<Portfolioapp> {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        final userrepo = s1<UserRepository>();
-                        await userrepo.userData();
-                      },
-                      child: Text('user'),
+              child: ListView.builder(
+                itemCount: scrips.length + 1,
+                itemBuilder: (BuildContext context, int i) {
+                  if (i == 0) {
+                    return Card(
+                      color: Colors.pink,
+                      child: SizedBox(width: w, height: h * .2),
+                    );
+                  }
+                  return MyCard(
+                    child: ListTile(
+                      leading: Icon(Icons.house),
+                      title: Text('${scrips[i - 1].name}'),
+                      subtitle: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('unit= ${scrips[i - 1].kitta}'),
+                          Text(
+                            'buydate=${scrips[i - 1].buydatetime.split('T')[0]}',
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],
         ),
+      ),
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        onTap: (x) {
+          if (x == 1) {
+            setState(() {
+              currentIndex = x;
+            });
+            showModalBottomSheet(
+              enableDrag: true,
+              showDragHandle: true,
+              isScrollControlled: true,
+              context: context,
+              builder: (BuildContext context) {
+                return Center();
+              },
+            );
+          }
+        },
+        backgroundColor: Colors.red.withAlpha(50),
+        elevation: 10,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+        ],
       ),
     );
   }

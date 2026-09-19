@@ -31,6 +31,6 @@ model scrip {
   sellprice Int
   kitta    Int
   buydatetime  DateTime
-  selldatetime DateTime
+  selldatetime DateTime?
   relation user     @relation(fields: [userid], references: [id])
 }

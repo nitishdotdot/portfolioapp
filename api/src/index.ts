@@ -99,21 +99,26 @@ app.post("/buyscrip", async (req, res) => {
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
 
     const data = req.body;
-    if (data.name && data.buyprice && data.kitta && data.buydatetime) {
-      await prisma.scrip.create({
-        data: {
-          name: data.name,
-          userid: Number((decoded as any).id),
-          buyprice: data.buyprice,
-          kitta: data.kitta,
-          buydatetime: data.buydate,
-          selldatetime: "",
-          sellprice: "",
-        },
-      });
-      res.send("done");
-    } else {
-      res.send("wrong body");
+    try {
+      if (data.name && data.buyprice && data.kitta && data.buydatetime) {
+        await prisma.scrip.create({
+          data: {
+            name: data.name,
+            userid: Number((decoded as any).id),
+            buyprice: data.buyprice,
+            kitta: data.kitta,
+            buydatetime: data.buydatetime,
+            selldatetime: null,
+            sellprice: 0,
+          },
+        });
+        res.send("done");
+      } else {
+        res.send("wrong body");
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
     }
   } catch (e) {
     res.status(400).send("invalid token");

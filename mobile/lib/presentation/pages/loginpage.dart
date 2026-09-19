@@ -91,25 +91,16 @@ class _LoginpageState extends State<Loginpage> {
                               obscureText: isobscured,
                               decoration: InputDecoration(
                                 prefixIcon: Icon(Icons.lock),
-                                suffixIcon: eyeiconcrossed
-                                    ? IconButton(
-                                        onPressed: () => {
-                                          setState(() {
-                                            isobscured = !isobscured;
-                                            eyeiconcrossed = !eyeiconcrossed;
-                                          }),
-                                        },
-                                        icon: Icon(Icons.visibility_off),
-                                      )
-                                    : IconButton(
-                                        onPressed: () => {
-                                          setState(() {
-                                            isobscured = !isobscured;
-                                            eyeiconcrossed = !eyeiconcrossed;
-                                          }),
-                                        },
-                                        icon: Icon(Icons.visibility),
-                                      ),
+                                suffixIcon: IconButton(
+                                  onPressed: () => {
+                                    setState(() {
+                                      isobscured = !isobscured;
+                                    }),
+                                  },
+                                  icon: (isobscured)
+                                      ? Icon(Icons.visibility_off)
+                                      : Icon(Icons.visibility),
+                                ),
                                 labelText: 'password',
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(24),
@@ -119,8 +110,9 @@ class _LoginpageState extends State<Loginpage> {
                             SizedBox(height: 15),
                             FloatingActionButton(
                               onPressed: () async {
-                                AuthApi authApi = AuthApiImpl();
-                                final isValidated = await authApi.signInApi(
+                                AuthRepository authRepository =
+                                    s1<AuthRepository>();
+                                final isValidated = await authRepository.signIn(
                                   email.text,
                                   password.text,
                                 );
