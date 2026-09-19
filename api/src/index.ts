@@ -6,6 +6,7 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import { stringify } from "node:querystring";
+import { UserScalarFieldEnum } from "./generated/prisma/internal/prismaNamespace.js";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -124,7 +125,31 @@ app.post("/buyscrip", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
-
+app.delete("/deletescrip", async (req, res) => {
+  try {
+    const jwtToken = req.headers["authorization"]?.split(" ")[1];
+    if (jwtToken == null) {
+      res.status(400).send("require token");
+      return;
+    }
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
+    const userid = (decoded as any).userid;
+    const data = req.body;
+    try {
+      if (data.id) {
+        await prisma.scrip.delete({
+          where: { id: data.id, userid: data.userid },
+        });
+        res.send("done");
+      } else {
+        res.send("wrong body");
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {}
+});
 app.get("/user", async (req, res) => {
   try {
     const header = req.headers["authorization"];

@@ -9,4 +9,9 @@ class UserRepositoryImpl extends UserRepository {
   Future<UserModel> userData() async {
     return await userApi.userDataApi();
   }
+
+  @override
+  Future<bool> deleteUserData() async {
+    return userApi.deleteaUserData();
+  }
 }

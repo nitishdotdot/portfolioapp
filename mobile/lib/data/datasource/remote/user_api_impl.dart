@@ -6,9 +6,9 @@ import 'package:portfolioapp/domain/api/user_api.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 
 class UserApiImpl extends UserApi {
+  Dio dio = Dio();
   @override
   Future<UserModel> userDataApi() async {
-    Dio dio = Dio();
     final localstorage = s1<Localstorage>();
     String? token = await localstorage.getToken();
     final response = await dio.get(
@@ -18,5 +18,25 @@ class UserApiImpl extends UserApi {
     print(response.data);
     final userModel = UserModel.fromJson(response.data);
     return userModel;
+  }
+
+  @override
+  Future<bool> deleteaUserData() async {
+    final localstorage = s1<Localstorage>();
+    String? token = await localstorage.getToken();
+    try {
+      final response = await dio.delete(
+        '${dotenv.get('BACKEND_URL')}/deleteuser',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
   }
 }
