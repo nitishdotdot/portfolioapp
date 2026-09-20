@@ -14,4 +14,14 @@ class UserRepositoryImpl extends UserRepository {
   Future<bool> deleteUserData() async {
     return userApi.deleteaUserData();
   }
+
+  @override
+  Future<bool> addUser(
+    String name,
+    int kitta,
+    int buyprice,
+    String buydatetime,
+  ) async {
+    return await userApi.addUserApi(name, kitta, buyprice, buydatetime);
+  }
 }

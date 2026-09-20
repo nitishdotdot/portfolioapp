@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,6 +33,8 @@ class _PortfolioappState extends State<Portfolioapp> {
   String? email;
   int? l;
   String? name;
+  DateTime? datetime;
+  String? date;
   List<ScripModel> scrips = [];
   @override
   void initState() {
@@ -53,6 +57,10 @@ class _PortfolioappState extends State<Portfolioapp> {
     final s = MediaQuery.of(context).size;
     final w = s.width;
     final h = s.height;
+    TextEditingController name1 = TextEditingController();
+    TextEditingController kitta1 = TextEditingController();
+    TextEditingController buyprice1 = TextEditingController();
+
     int currentIndex = 0;
     return Scaffold(
       appBar: AppBar(),
@@ -180,7 +188,9 @@ class _PortfolioappState extends State<Portfolioapp> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('unit= ${scrips[i - 1].kitta}'),
+                          Text(
+                            'unit= ${scrips[i - 1].kitta} @ ${scrips[i - 1].buyprice}',
+                          ),
                           Text(
                             'buydate=${scrips[i - 1].buydatetime.split('T')[0]}',
                           ),
@@ -208,7 +218,111 @@ class _PortfolioappState extends State<Portfolioapp> {
               isScrollControlled: true,
               context: context,
               builder: (BuildContext context) {
-                return Center();
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    10,
+                    10,
+                    10,
+                    MediaQuery.of(context).viewInsets.bottom + 10,
+                  ),
+                  child: SingleChildScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Buy Share'),
+                        TextFormField(
+                          controller: name1,
+                          decoration: InputDecoration(
+                            labelText: 'name',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        TextFormField(
+                          controller: kitta1,
+                          decoration: InputDecoration(
+                            labelText: 'quantity',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        TextFormField(
+                          controller: buyprice1,
+                          decoration: InputDecoration(
+                            labelText: 'price',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: FloatingActionButton(
+                                onPressed: () async {
+                                  datetime =
+                                      await showDatePicker(
+                                        context: context,
+                                        firstDate: DateTime.now(),
+                                        lastDate: DateTime(2027),
+                                      ) ??
+                                      DateTime.now();
+                                  setState(() {
+                                    date = (datetime ?? DateTime.now())
+                                        .toUtc()
+                                        .toIso8601String();
+                                  });
+                                },
+                                child: Text(datetime.toString().split(' ')[0]),
+                              ),
+                            ),
+                          ],
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final userrepo = s1<UserRepository>();
+                            bool responce = await userrepo.addUser(
+                              name1.text,
+                              int.parse(kitta1.text),
+                              int.parse(buyprice1.text),
+                              (datetime ?? DateTime.now())
+                                  .toUtc()
+                                  .toIso8601String(),
+                            );
+                            if (context.mounted) {
+                              if (responce == true) {
+                                getUerData();
+                                Navigator.pop(context);
+                              } else {
+                                showDialog(
+                                  context: context,
+                                  builder: (_) {
+                                    return AlertDialog(
+                                      content: Text('error in buying'),
+                                      actions: [
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('ok'),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            }
+                          },
+                          child: Text('buy'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
             );
           }

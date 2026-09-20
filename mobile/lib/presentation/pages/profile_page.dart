@@ -18,7 +18,10 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => Portfolioapp()),
+                );
               },
               icon: Icon(Icons.arrow_back),
             ),

@@ -39,4 +39,35 @@ class UserApiImpl extends UserApi {
       return false;
     }
   }
+
+  @override
+  Future<bool> addUserApi(
+    String name,
+    int kitta,
+    int buyprice,
+    String buydatetime,
+  ) async {
+    final localstorage = s1<Localstorage>();
+    String? token = await localstorage.getToken();
+    try {
+      final response = await dio.post(
+        '${dotenv.get('BACKEND_URL')}/buyscrip',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        data: {
+          "name": name,
+          "kitta": kitta,
+          "buyprice": buyprice,
+          "buydatetime": buydatetime,
+        },
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 }
