@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
+import 'package:portfolioapp/data/datasource/local/localstorage.dart';
 import 'package:portfolioapp/data/datasource/remote/auth_api_impl.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/api/auth_api.dart';
@@ -8,11 +9,13 @@ import 'package:portfolioapp/domain/repository/auth_repository.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
+import 'package:portfolioapp/presentation/pages/adminpage.dart';
 import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'package:portfolioapp/presentation/pages/signup.dart';
 import 'package:portfolioapp/presentation/widget/footer.dart';
 import 'package:portfolioapp/presentation/widget/header.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class Loginpage extends StatefulWidget {
   const Loginpage({super.key});
@@ -116,14 +119,29 @@ class _LoginpageState extends State<Loginpage> {
                                   email.text,
                                   password.text,
                                 );
+                                final localstorage = s1<Localstorage>();
+                                final token = await localstorage.getToken();
+                                String role = JwtDecoder.decode(
+                                  token.toString(),
+                                )['role'];
+
                                 if (context.mounted) {
                                   if (isValidated) {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => Portfolioapp(),
-                                      ),
-                                    );
+                                    if (role == 'admin') {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => AdminPage(),
+                                        ),
+                                      );
+                                    } else {
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => Portfolioapp(),
+                                        ),
+                                      );
+                                    }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
@@ -147,13 +165,26 @@ class _LoginpageState extends State<Loginpage> {
                                 final authRepository = s1<AuthRepository>();
                                 final response = await authRepository
                                     .googleSignin();
+                                final localstorage = s1<Localstorage>();
+                                final token = await localstorage.getToken();
+                                String role = JwtDecoder.decode(
+                                  token.toString(),
+                                )['role'];
                                 if (context.mounted) {
                                   if (response == true) {
-                                    Navigator.of(context).pushReplacement(
-                                      MaterialPageRoute(
-                                        builder: (_) => Portfolioapp(),
-                                      ),
-                                    );
+                                    if (role == 'user') {
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          builder: (_) => Portfolioapp(),
+                                        ),
+                                      );
+                                    } else {
+                                      Navigator.of(context).pushReplacement(
+                                        MaterialPageRoute(
+                                          builder: (_) => AdminPage(),
+                                        ),
+                                      );
+                                    }
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(

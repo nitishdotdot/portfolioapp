@@ -1,3 +1,4 @@
+import 'package:portfolioapp/data/models/alluser_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
 import 'package:portfolioapp/domain/api/user_api.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
@@ -23,5 +24,10 @@ class UserRepositoryImpl extends UserRepository {
     String buydatetime,
   ) async {
     return await userApi.addUserApi(name, kitta, buyprice, buydatetime);
+  }
+
+  @override
+  Future<List<AlluserModel>> getallUser() async {
+    return await userApi.getallUserApi();
   }
 }
