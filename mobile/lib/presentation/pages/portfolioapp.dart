@@ -189,7 +189,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'unit= ${scrips[i - 1].kitta} @ ${scrips[i - 1].buyprice}',
+                            'unit= ${scrips[i - 1].kitta} @ ${scrips[i - 1].buyprice},wacc=${scrips[i - 1].wacc}',
                           ),
                           Text(
                             'buydate=${scrips[i - 1].buydatetime.split('T')[0]}',

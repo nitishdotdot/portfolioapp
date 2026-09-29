@@ -5,6 +5,7 @@ class ScripModel {
   String buydatetime;
   String? selldatetime;
   int? sellprice;
+  double? wacc;
   ScripModel(
     this.name,
     this.kitta,
@@ -12,6 +13,7 @@ class ScripModel {
     this.buyprice,
     this.selldatetime,
     this.sellprice,
+    this.wacc,
   );
   factory ScripModel.fromJson(Map<String, dynamic> json) {
     return ScripModel(
@@ -21,6 +23,7 @@ class ScripModel {
       json['buyprice'],
       json['selldatetime'],
       json['sellprice'],
+      json['wacc'],
     );
   }
 }

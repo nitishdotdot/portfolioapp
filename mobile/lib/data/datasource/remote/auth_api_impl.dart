@@ -16,6 +16,7 @@ class AuthApiImpl extends AuthApi {
         '$url/signin',
         data: {'email': email, 'password': password},
       );
+      print('-------${response.data}');
       if (response.statusCode == 200) {
         final localstorage = s1<Localstorage>();
         await localstorage.saveToken(response.data);
@@ -74,6 +75,7 @@ class AuthApiImpl extends AuthApi {
       );
       if (response.statusCode == 200) {
         final localstorage = s1<Localstorage>();
+        print(response.data);
         await localstorage.saveToken(response.data);
         return true;
       } else {

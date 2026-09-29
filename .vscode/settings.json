@@ -1,3 +1,4 @@
 {
-    "editor.codeActionsOnSave": {}
+  "editor.codeActionsOnSave": {},
+  "cmake.sourceDirectory": "/home/nitish/Desktop/portfolioapp/mobile/linux"
 }

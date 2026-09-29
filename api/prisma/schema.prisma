@@ -27,10 +27,19 @@ model scrip {
   id       Int      @id @default(autoincrement())
   name     String
   userid   Int
-  buyprice Int
-  sellprice Int
+  buyprice Decimal @db.Decimal(10,3)
+  sellprice Decimal @db.Decimal(10,3)
   kitta    Int
   buydatetime  DateTime
   selldatetime DateTime?
+  wacc Decimal @db.Decimal(10,3)
   relation user     @relation(fields: [userid], references: [id])
 }
+model tax{
+  id Int @id @unique @default(autoincrement())
+  sebComm  Decimal @db.Decimal(5,3)
+  brComm Decimal @db.Decimal(5,3)
+  dpCharge Int 
+  shortTax Decimal @db.Decimal(5,3)
+  longTax Decimal @db.Decimal(5,3)
+  }

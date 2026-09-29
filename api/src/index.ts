@@ -6,7 +6,9 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import { stringify } from "node:querystring";
-import { UserScalarFieldEnum } from "./generated/prisma/internal/prismaNamespace.js";
+import { broadcast } from "node:stream/iter";
+import { cp } from "node:fs";
+import { Decimal } from "@prisma/client/runtime/client";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -98,10 +100,25 @@ app.post("/buyscrip", async (req, res) => {
       return;
     }
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
-
     const data = req.body;
+    let wacc;
     try {
       if (data.name && data.buyprice && data.kitta && data.buydatetime) {
+        try {
+          const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+          const sebComm = tax?.sebComm as Decimal;
+          const brComm = tax?.brComm as Decimal;
+          const dpCharge = tax?.dpCharge as number;
+          wacc =
+            data.buyprice *
+              data.kitta *
+              Number(brComm?.plus(sebComm).times(1 / 100)) +
+            dpCharge +
+            data.buyprice * data.kitta;
+          console.log(wacc);
+        } catch (e) {
+          res.status(500).send("error in getting tax");
+        }
         await prisma.scrip.create({
           data: {
             name: data.name,
@@ -111,6 +128,7 @@ app.post("/buyscrip", async (req, res) => {
             buydatetime: data.buydatetime,
             selldatetime: null,
             sellprice: 0,
+            wacc: Number(wacc),
           },
         });
         res.send("done");
@@ -174,6 +192,7 @@ app.get("/user", async (req, res) => {
               buydatetime: true,
               selldatetime: true,
               sellprice: true,
+              wacc: true,
             },
           },
         },
