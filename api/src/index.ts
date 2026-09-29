@@ -219,4 +219,33 @@ app.get("/user", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
+app.get("/alluser", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const role = (decoded as any).role;
+    if (role != "admin") {
+      res.status(404).send("No Permission");
+    }
+    try {
+      const response = await prisma.user.findMany({
+        select: {
+          name: true,
+          email: true,
+        },
+      });
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
 app.use((req, res) => res.send("route not found"));
