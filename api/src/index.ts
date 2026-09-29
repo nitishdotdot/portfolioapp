@@ -123,12 +123,13 @@ app.post("/buyscrip", async (req, res) => {
           const sebComm = tax?.sebComm as Decimal;
           const brComm = tax?.brComm as Decimal;
           const dpCharge = tax?.dpCharge as number;
-          wacc =
+          const total =
             data.buyprice *
               data.kitta *
               Number(brComm?.plus(sebComm).times(1 / 100)) +
             dpCharge +
             data.buyprice * data.kitta;
+          wacc = total / data.kitta;
         } catch (e) {
           res.status(500).send("error in getting tax");
         }

@@ -1,11 +1,11 @@
 class ScripModel {
   String name;
   int kitta;
-  int buyprice;
+  String buyprice;
   String buydatetime;
   String? selldatetime;
-  int? sellprice;
-  double? wacc;
+  String? sellprice;
+  String wacc;
   ScripModel(
     this.name,
     this.kitta,

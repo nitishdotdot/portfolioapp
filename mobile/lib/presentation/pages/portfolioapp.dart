@@ -1,7 +1,4 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
@@ -189,7 +186,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'unit= ${scrips[i - 1].kitta} @ ${scrips[i - 1].buyprice},wacc=${scrips[i - 1].wacc}',
+                            'unit= ${scrips[i - 1].kitta} @ ${scrips[i - 1].buyprice} @ ${scrips[i - 1].wacc}',
                           ),
                           Text(
                             'buydate=${scrips[i - 1].buydatetime.split('T')[0]}',

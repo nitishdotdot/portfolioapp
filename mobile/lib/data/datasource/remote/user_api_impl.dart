@@ -11,6 +11,7 @@ class UserApiImpl extends UserApi {
   Future<UserModel> userDataApi() async {
     final localstorage = s1<Localstorage>();
     String? token = await localstorage.getToken();
+
     final response = await dio.get(
       '${dotenv.get('BACKEND_URL')}/user',
       options: Options(headers: {'Authorization': 'Bearer $token'}),
