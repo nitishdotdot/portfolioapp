@@ -26,9 +26,16 @@ app.post("/googlesignin", async (req, res) => {
   const googleId = req.body.googleId;
   const photoUrl = req.body.photoUrl;
   const idToken = req.body.idToken;
+  let role;
+  if (req.body.role) {
+    role = req.body.role;
+  } else {
+    role = "user";
+  }
   const tokenResponse = await googleAuth.verifyIdToken({
     idToken: idToken,
   });
+
   if (name && email && googleId && photoUrl && idToken) {
     try {
       if (!tokenResponse["payload"]["email_verified"]) {
@@ -47,7 +54,7 @@ app.post("/googlesignin", async (req, res) => {
           email: email,
           photoUrl: photoUrl,
           googleId: googleId,
-          idToken: idToken,
+          role: role,
         },
       });
       const token = jwt.sign(user, process.env.JWT_SECRET!);
@@ -61,12 +68,19 @@ app.post("/googlesignin", async (req, res) => {
 });
 app.post("/signup", async (req, res) => {
   const data = req.body;
+  let role;
+  if (data.role) {
+    role = data.role;
+  } else {
+    role = "user";
+  }
   if (data.email && data.password && data.name) {
     await prisma.user.create({
       data: {
         name: data.name,
         email: data.email,
         password: await bcrypt.hash(data.password, 10),
+        role: role,
       },
     });
     res.sendStatus(200);
@@ -115,7 +129,6 @@ app.post("/buyscrip", async (req, res) => {
               Number(brComm?.plus(sebComm).times(1 / 100)) +
             dpCharge +
             data.buyprice * data.kitta;
-          console.log(wacc);
         } catch (e) {
           res.status(500).send("error in getting tax");
         }

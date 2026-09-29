@@ -15,11 +15,11 @@ datasource db {
 model user {
   id   Int    @id @default(autoincrement())
   name String
+  role String 
   email String @unique
   googleId String?
   photoUrl String?
-  password String?
-  idToken String?
+  password String? 
   scrips scrip[]
 }
 
