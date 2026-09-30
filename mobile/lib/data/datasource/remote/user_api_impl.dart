@@ -23,7 +23,7 @@ class UserApiImpl extends UserApi {
   }
 
   @override
-  Future<bool> deleteaUserData() async {
+  Future<bool> deleteaUserApi() async {
     final localstorage = s1<Localstorage>();
     String? token = await localstorage.getToken();
     try {

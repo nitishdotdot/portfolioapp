@@ -12,8 +12,8 @@ class UserRepositoryImpl extends UserRepository {
   }
 
   @override
-  Future<bool> deleteUserData() async {
-    return userApi.deleteaUserData();
+  Future<bool> deleteuser() async {
+    return userApi.deleteaUserApi();
   }
 
   @override
