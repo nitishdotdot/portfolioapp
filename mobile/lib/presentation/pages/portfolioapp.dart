@@ -15,6 +15,7 @@ import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:portfolioapp/presentation/pages/profile_page.dart';
+import 'package:portfolioapp/presentation/pages/settings.dart';
 import 'package:portfolioapp/presentation/widget/card.dart';
 
 class Portfolioapp extends StatefulWidget {
@@ -137,7 +138,14 @@ class _PortfolioappState extends State<Portfolioapp> {
                 ),
                 Divider(thickness: 2),
                 Align(alignment: Alignment.topLeft, child: Text('Seetings')),
-                ListTile(leading: Icon(Icons.settings), title: Text('setting')),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('setting'),
+                  onTap: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => Settings()),
+                  ),
+                ),
                 Divider(thickness: 2),
                 Align(
                   alignment: Alignment.topLeft,

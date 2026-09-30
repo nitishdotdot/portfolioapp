@@ -157,6 +157,29 @@ app.post("/buyscrip", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
+app.delete("/deleteuser", async (req, res) => {
+  try {
+    const jwtToken = req.headers["authorization"]?.split(" ")[1];
+    if (jwtToken == null) {
+      res.status(400).send("require token");
+      return;
+    }
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
+    console.log(decoded);
+    const id = (decoded as any).id;
+    console.log(id);
+    try {
+      await prisma.scrip.deleteMany({ where: { userid: id } });
+      await prisma.user.delete({
+        where: { id: id },
+      });
+      res.send("ok");
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {}
+});
 app.delete("/deletescrip", async (req, res) => {
   try {
     const jwtToken = req.headers["authorization"]?.split(" ")[1];
