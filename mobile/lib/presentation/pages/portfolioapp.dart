@@ -33,6 +33,7 @@ class _PortfolioappState extends State<Portfolioapp> {
   String? name;
   DateTime? datetime;
   String? date;
+  String? holdings;
   List<ScripModel> scrips = [];
   @override
   void initState() {
@@ -188,16 +189,16 @@ class _PortfolioappState extends State<Portfolioapp> {
                   return MyCard(
                     child: ListTile(
                       leading: Icon(Icons.house),
-                      title: Text('${scrips[i - 1].name}'),
+                      title: Text(scrips[i - 1].name),
                       subtitle: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text('unit= ${scrips[i - 1].kitta}'),
+                          Text('Price=${scrips[i - 1].buyprice}'),
+                          Text('Wacc=${scrips[i - 1].wacc}'),
                           Text(
-                            'unit= ${scrips[i - 1].kitta} @ ${scrips[i - 1].buyprice} @ ${scrips[i - 1].wacc}',
-                          ),
-                          Text(
-                            'buydate=${scrips[i - 1].buydatetime.split('T')[0]}',
+                            'buydate=${scrips[i - 1].buydatetime?.split('T')[0]},${DateTime.now().difference(DateTime.parse(scrips[i - 1].buydatetime.toString())).inDays} DAYS',
                           ),
                         ],
                       ),

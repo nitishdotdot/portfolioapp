@@ -2,7 +2,7 @@ class ScripModel {
   String name;
   int kitta;
   String buyprice;
-  String buydatetime;
+  String? buydatetime;
   String? selldatetime;
   String? sellprice;
   String wacc;

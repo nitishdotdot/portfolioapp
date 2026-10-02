@@ -9,6 +9,9 @@ import { stringify } from "node:querystring";
 import { broadcast } from "node:stream/iter";
 import { cp } from "node:fs";
 import { Decimal } from "@prisma/client/runtime/client";
+import { DatabaseSync } from "node:sqlite";
+import { brotliDecompressSync } from "node:zlib";
+import { json } from "node:stream/consumers";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -118,24 +121,72 @@ app.post("/buyscrip", async (req, res) => {
     let wacc;
     try {
       if (data.name && data.buyprice && data.kitta && data.buydatetime) {
-        try {
-          const tax = await prisma.tax.findFirst({ where: { id: 1 } });
-          const sebComm = tax?.sebComm as Decimal;
-          const brComm = tax?.brComm as Decimal;
-          const dpCharge = tax?.dpCharge as number;
-          const total =
-            data.buyprice *
-              data.kitta *
-              Number(brComm?.plus(sebComm).times(1 / 100)) +
-            dpCharge +
-            data.buyprice * data.kitta;
-          wacc = total / data.kitta;
-        } catch (e) {
-          res.status(500).send("error in getting tax");
+        const scripName = (data.name as string).trim().toUpperCase();
+        const user = await prisma.scrip.findFirst({
+          where: { name: scripName },
+        });
+        if (user != null) {
+          const date1 = data.buydatetime.split("T")[0];
+          const date2 = user.buydatetime.toISOString().split("T")[0];
+          if (date1 == date2) {
+            console.log("success");
+            const total0 = user.wacc.times(user.kitta);
+            const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+            const sebComm = tax?.sebComm as Decimal;
+            const brComm = tax?.brComm as Decimal;
+            const dpCharge = tax?.dpCharge as number;
+            const total1 =
+              data.buyprice *
+                data.kitta *
+                Number(brComm?.plus(sebComm).times(1 / 100)) +
+              data.buyprice * data.kitta;
+            const total2 = total0.plus(total1);
+            const wacc = (total2 as Decimal).times(
+              1 / (data.kitta + user.kitta),
+            );
+            await prisma.scrip.update({
+              where: { id: user.id },
+              data: { kitta: user.kitta + data.kitta, wacc: wacc },
+            });
+            res.send("ok");
+            return;
+          } else {
+            const total0 = user.wacc.times(user.kitta);
+            const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+            const sebComm = tax?.sebComm as Decimal;
+            const brComm = tax?.brComm as Decimal;
+            const dpCharge = tax?.dpCharge as number;
+            const total1 =
+              data.buyprice *
+                data.kitta *
+                Number(brComm?.plus(sebComm).times(1 / 100)) +
+              data.buyprice * data.kitta +
+              dpCharge;
+            const total2 = total0.plus(total1);
+            wacc = Number(total2) / (data.kitta + user.kitta);
+            await prisma.scrip.update({
+              where: { id: user.id },
+              data: { kitta: user.kitta + data.kitta, wacc: wacc },
+            });
+            res.send("ok");
+            return;
+          }
         }
+        const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+        const sebComm = tax?.sebComm as Decimal;
+        const brComm = tax?.brComm as Decimal;
+        const dpCharge = tax?.dpCharge as number;
+        const total =
+          data.buyprice *
+            data.kitta *
+            Number(brComm?.plus(sebComm).times(1 / 100)) +
+          dpCharge +
+          data.buyprice * data.kitta;
+        wacc = total / data.kitta;
+        const name = (data.name as string).trim().toUpperCase();
         await prisma.scrip.create({
           data: {
-            name: data.name,
+            name: name,
             userid: Number((decoded as any).id),
             buyprice: data.buyprice,
             kitta: data.kitta,
@@ -165,9 +216,7 @@ app.delete("/deleteuser", async (req, res) => {
       return;
     }
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
-    console.log(decoded);
     const id = (decoded as any).id;
-    console.log(id);
     try {
       await prisma.scrip.deleteMany({ where: { userid: id } });
       await prisma.user.delete({
