@@ -20,19 +20,52 @@ model user {
   googleId String?
   photoUrl String?
   password String? 
-  scrips scrip[]
+  buyscrips buyscrip[]
+  sellscrips sellscrip[]
+  buyscriphistory buyscriphistory[]
+  sellscriphistory sellscriphistory[]
 }
 
-model scrip {
+model buyscrip {
+  id       Int      @id @default(autoincrement())
+  name     String
+  userid   Int 
+  kitta    Int 
+  wacc Decimal @db.Decimal(10,3)
+  total Decimal @db.Decimal(10,3)
+  relation user     @relation(fields: [userid], references: [id])
+} 
+model buyscriphistory {
   id       Int      @id @default(autoincrement())
   name     String
   userid   Int
-  buyprice Decimal @db.Decimal(10,3)
-  sellprice Decimal @db.Decimal(10,3)
+  buyprice Decimal @db.Decimal(10,3) 
   kitta    Int
-  buydatetime  DateTime
-  selldatetime DateTime?
+  buydatetime  DateTime 
   wacc Decimal @db.Decimal(10,3)
+  total Decimal @db.Decimal(10,3)
+  relation user     @relation(fields: [userid], references: [id])
+} 
+model sellscrip {
+  id       Int      @id @default(autoincrement())
+  name     String
+  userid   Int 
+  kitta    Int 
+  wacc Decimal @db.Decimal(10,3)
+  total Decimal @db.Decimal(10,3)
+  profit Decimal @db.Decimal(10,3)
+  relation user     @relation(fields: [userid], references: [id])
+}
+model sellscriphistory {
+  id       Int      @id @default(autoincrement())
+  name     String
+  userid   Int
+  sellprice Decimal @db.Decimal(10,3) 
+  kitta    Int
+  selldatetime  DateTime 
+  wacc Decimal @db.Decimal(10,3)
+  total Decimal @db.Decimal(10,3)
+  profit Decimal @db.Decimal(10,3)
   relation user     @relation(fields: [userid], references: [id])
 }
 model tax{

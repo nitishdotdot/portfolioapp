@@ -27,6 +27,10 @@ class Portfolioapp extends StatefulWidget {
 
 class _PortfolioappState extends State<Portfolioapp> {
   final userApi = s1<UserApi>();
+
+  TextEditingController name1 = TextEditingController();
+  TextEditingController kitta1 = TextEditingController();
+  TextEditingController buyprice1 = TextEditingController();
   String? token;
   String? email;
   int? l;
@@ -39,6 +43,124 @@ class _PortfolioappState extends State<Portfolioapp> {
   void initState() {
     super.initState();
     getUerData();
+  }
+
+  void modelButtomSheet() {
+    showModalBottomSheet(
+      enableDrag: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            10,
+            10,
+            10,
+            MediaQuery.of(context).viewInsets.bottom + 10,
+          ),
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Buy Share'),
+                TextFormField(
+                  controller: name1,
+                  decoration: InputDecoration(
+                    labelText: 'name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: kitta1,
+                  decoration: InputDecoration(
+                    labelText: 'quantity',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: buyprice1,
+                  decoration: InputDecoration(
+                    labelText: 'price',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          datetime =
+                              await showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 365),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
+                              ) ??
+                              DateTime.now();
+                          setState(() {
+                            date = (datetime ?? DateTime.now())
+                                .toUtc()
+                                .toIso8601String();
+                          });
+                        },
+                        child: Text(datetime.toString().split(' ')[0]),
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final userrepo = s1<UserRepository>();
+                    bool responce = await userrepo.addUser(
+                      name1.text,
+                      int.parse(kitta1.text),
+                      int.parse(buyprice1.text),
+                      (datetime ?? DateTime.now()).toUtc().toIso8601String(),
+                    );
+                    if (context.mounted) {
+                      if (responce == true) {
+                        getUerData();
+                        Navigator.pop(context);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              content: Text('error in buying'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('ok'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                  child: Text('buy'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void getUerData() async {
@@ -56,9 +178,6 @@ class _PortfolioappState extends State<Portfolioapp> {
     final s = MediaQuery.of(context).size;
     final w = s.width;
     final h = s.height;
-    TextEditingController name1 = TextEditingController();
-    TextEditingController kitta1 = TextEditingController();
-    TextEditingController buyprice1 = TextEditingController();
 
     int currentIndex = 0;
     return Scaffold(
@@ -190,15 +309,34 @@ class _PortfolioappState extends State<Portfolioapp> {
                     child: ListTile(
                       leading: Icon(Icons.house),
                       title: Text(scrips[i - 1].name),
-                      subtitle: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      subtitle: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('unit= ${scrips[i - 1].kitta}'),
-                          Text('Price=${scrips[i - 1].buyprice}'),
-                          Text('Wacc=${scrips[i - 1].wacc}'),
-                          Text(
-                            'buydate=${scrips[i - 1].buydatetime?.split('T')[0]},${DateTime.now().difference(DateTime.parse(scrips[i - 1].buydatetime.toString())).inDays} DAYS',
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('unit= ${scrips[i - 1].kitta}'),
+                              Text('Wacc=${scrips[i - 1].wacc}'),
+                              Text('total=${scrips[i - 1].total}'),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => {modelButtomSheet()},
+                                    icon: Icon(Icons.add_circle_outlined),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => {},
+                                    icon: Icon(Icons.remove_circle),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -218,119 +356,7 @@ class _PortfolioappState extends State<Portfolioapp> {
             setState(() {
               currentIndex = x;
             });
-            showModalBottomSheet(
-              enableDrag: true,
-              showDragHandle: true,
-              isScrollControlled: true,
-              context: context,
-              builder: (BuildContext context) {
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    10,
-                    10,
-                    10,
-                    MediaQuery.of(context).viewInsets.bottom + 10,
-                  ),
-                  child: SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Buy Share'),
-                        TextFormField(
-                          controller: name1,
-                          decoration: InputDecoration(
-                            labelText: 'name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: kitta1,
-                          decoration: InputDecoration(
-                            labelText: 'quantity',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        TextFormField(
-                          controller: buyprice1,
-                          decoration: InputDecoration(
-                            labelText: 'price',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: FloatingActionButton(
-                                onPressed: () async {
-                                  datetime =
-                                      await showDatePicker(
-                                        context: context,
-                                        firstDate: DateTime.now(),
-                                        lastDate: DateTime(2027),
-                                      ) ??
-                                      DateTime.now();
-                                  setState(() {
-                                    date = (datetime ?? DateTime.now())
-                                        .toUtc()
-                                        .toIso8601String();
-                                  });
-                                },
-                                child: Text(datetime.toString().split(' ')[0]),
-                              ),
-                            ),
-                          ],
-                        ),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final userrepo = s1<UserRepository>();
-                            bool responce = await userrepo.addUser(
-                              name1.text,
-                              int.parse(kitta1.text),
-                              int.parse(buyprice1.text),
-                              (datetime ?? DateTime.now())
-                                  .toUtc()
-                                  .toIso8601String(),
-                            );
-                            if (context.mounted) {
-                              if (responce == true) {
-                                getUerData();
-                                Navigator.pop(context);
-                              } else {
-                                showDialog(
-                                  context: context,
-                                  builder: (_) {
-                                    return AlertDialog(
-                                      content: Text('error in buying'),
-                                      actions: [
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Text('ok'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                );
-                              }
-                            }
-                          },
-                          child: Text('buy'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
+            modelButtomSheet();
           }
         },
         backgroundColor: Colors.red.withAlpha(50),

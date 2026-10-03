@@ -6,7 +6,7 @@ class UserModel {
   List<ScripModel> scrip;
   UserModel(this.name, this.email, this.scrip);
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(json['name'], json['email'], makeScrip(json['scrips']));
+    return UserModel(json['name'], json['email'], makeScrip(json['buyscrips']));
   }
   static List<ScripModel> makeScrip(List scrip) {
     return scrip.map((x) => ScripModel.fromJson(x)).toList();
