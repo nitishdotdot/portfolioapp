@@ -375,6 +375,32 @@ app.get("/user", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
+app.delete("/deletescrip", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    const data = req.body;
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    if (data.scripName) {
+      const token = header.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+      const id = (decoded as any).id;
+      await prisma.buyscriphistory.deleteMany({
+        where: { userid: Number(id), name: data.scripName },
+      });
+      await prisma.buyscrip.deleteMany({
+        where: { userid: Number(id), name: data.scripName },
+      });
+      res.send("ok");
+    } else {
+      res.status(400).send("wrong body");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
 app.get("/alluser", async (req, res) => {
   try {
     const header = req.headers["authorization"];

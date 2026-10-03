@@ -118,4 +118,25 @@ class UserApiImpl extends UserApi {
       return false;
     }
   }
+
+  @override
+  Future<bool> deletescrip(String scripname) async {
+    final localstorage = s1<Localstorage>();
+    String? token = await localstorage.getToken();
+    try {
+      final response = await dio.delete(
+        '${dotenv.get('BACKEND_URL')}/deletescrip',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        data: {"scripName": scripname},
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
 }

@@ -40,4 +40,9 @@ class UserRepositoryImpl extends UserRepository {
   ) {
     return userApi.sellUserApi(name, kitta, buyprice, buydatetime);
   }
+
+  @override
+  Future<bool> deletescrip(String name) {
+    return userApi.deletescrip(name);
+  }
 }

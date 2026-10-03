@@ -13,4 +13,5 @@ abstract class UserApi {
     String buytime,
   );
   Future<List<AlluserModel>> getallUserApi();
+  Future<bool> deletescrip(String scripname);
 }

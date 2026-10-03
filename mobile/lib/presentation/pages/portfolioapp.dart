@@ -45,6 +45,11 @@ class _PortfolioappState extends State<Portfolioapp> {
     getUerData();
   }
 
+  Future<bool> deletescrip(String scripname) async {
+    final userapi = s1<UserRepository>();
+    return await userapi.deletescrip(scripname);
+  }
+
   void sellmodelButtomSheet() {
     showModalBottomSheet(
       enableDrag: true,
@@ -291,6 +296,10 @@ class _PortfolioappState extends State<Portfolioapp> {
     });
   }
 
+  void refresh() {
+    getUerData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = MediaQuery.of(context).size;
@@ -299,7 +308,16 @@ class _PortfolioappState extends State<Portfolioapp> {
 
     int currentIndex = 0;
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              refresh();
+            },
+            child: Icon(Icons.refresh),
+          ),
+        ],
+      ),
       drawer: Drawer(
         width: w * .9,
         child: SingleChildScrollView(
@@ -458,6 +476,56 @@ class _PortfolioappState extends State<Portfolioapp> {
                           ),
                         ],
                       ),
+                      onLongPress: () async {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Are you sure to delete this scrip'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          final deleted = await deletescrip(
+                                            scrips[i - 1].name,
+                                          );
+                                          if (context.mounted) {
+                                            if (deleted) {
+                                              refresh();
+                                              Navigator.pop(context);
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'error in deleting scrip',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: Text('yes'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('no'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
                   );
                 },

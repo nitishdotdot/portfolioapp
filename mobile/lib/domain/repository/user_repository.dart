@@ -17,4 +17,6 @@ abstract class UserRepository {
     int buyprice,
     String buydatetime,
   );
+
+  Future<bool> deletescrip(String name);
 }
