@@ -126,7 +126,6 @@ app.post("/buyscrip", async (req, res) => {
           where: { name: scripName, userid: Number((decoded as any).id) },
         });
         if (buyscripshistory.length > 0) {
-          console.log("found");
           const buyscrip = await prisma.buyscrip.findFirst({
             where: { name: scripName, userid: Number((decoded as any).id) },
           });

@@ -45,7 +45,125 @@ class _PortfolioappState extends State<Portfolioapp> {
     getUerData();
   }
 
-  void modelButtomSheet() {
+  void sellmodelButtomSheet() {
+    showModalBottomSheet(
+      enableDrag: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            10,
+            10,
+            10,
+            MediaQuery.of(context).viewInsets.bottom + 10,
+          ),
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Sell Share'),
+                TextFormField(
+                  controller: name1,
+                  decoration: InputDecoration(
+                    labelText: 'name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: kitta1,
+                  decoration: InputDecoration(
+                    labelText: 'quantity',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: buyprice1,
+                  decoration: InputDecoration(
+                    labelText: 'price',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          datetime =
+                              await showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 365),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
+                              ) ??
+                              DateTime.now();
+                          setState(() {
+                            date = (datetime ?? DateTime.now())
+                                .toUtc()
+                                .toIso8601String();
+                          });
+                        },
+                        child: Text(datetime.toString().split(' ')[0]),
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final userrepo = s1<UserRepository>();
+                    bool responce = await userrepo.addUser(
+                      name1.text,
+                      int.parse(kitta1.text),
+                      int.parse(buyprice1.text),
+                      (datetime ?? DateTime.now()).toUtc().toIso8601String(),
+                    );
+                    if (context.mounted) {
+                      if (responce == true) {
+                        getUerData();
+                        Navigator.pop(context);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              content: Text('error in buying'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('ok'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                  child: Text('buy'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void buymodelButtomSheet() {
     showModalBottomSheet(
       enableDrag: true,
       showDragHandle: true,
@@ -327,11 +445,11 @@ class _PortfolioappState extends State<Portfolioapp> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   IconButton(
-                                    onPressed: () => {modelButtomSheet()},
+                                    onPressed: () => {buymodelButtomSheet()},
                                     icon: Icon(Icons.add_circle_outlined),
                                   ),
                                   IconButton(
-                                    onPressed: () => {},
+                                    onPressed: () => {sellmodelButtomSheet()},
                                     icon: Icon(Icons.remove_circle),
                                   ),
                                 ],
@@ -356,7 +474,7 @@ class _PortfolioappState extends State<Portfolioapp> {
             setState(() {
               currentIndex = x;
             });
-            modelButtomSheet();
+            buymodelButtomSheet();
           }
         },
         backgroundColor: Colors.red.withAlpha(50),

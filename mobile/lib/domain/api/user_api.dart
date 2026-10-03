@@ -5,5 +5,12 @@ abstract class UserApi {
   Future<UserModel> userDataApi();
   Future<bool> deleteaUserApi();
   Future<bool> addUserApi(String name, int kitta, int buyprice, String buytime);
+
+  Future<bool> sellUserApi(
+    String name,
+    int kitta,
+    int buyprice,
+    String buytime,
+  );
   Future<List<AlluserModel>> getallUserApi();
 }

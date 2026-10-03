@@ -11,4 +11,10 @@ abstract class UserRepository {
     String buydatetime,
   );
   Future<List<AlluserModel>> getallUser();
+  Future<bool> sellUser(
+    String name,
+    int kitta,
+    int buyprice,
+    String buydatetime,
+  );
 }

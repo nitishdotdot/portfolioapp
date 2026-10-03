@@ -30,4 +30,14 @@ class UserRepositoryImpl extends UserRepository {
   Future<List<AlluserModel>> getallUser() async {
     return await userApi.getallUserApi();
   }
+
+  @override
+  Future<bool> sellUser(
+    String name,
+    int kitta,
+    int buyprice,
+    String buydatetime,
+  ) {
+    return userApi.sellUserApi(name, kitta, buyprice, buydatetime);
+  }
 }
