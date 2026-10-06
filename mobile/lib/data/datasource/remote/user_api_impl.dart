@@ -92,8 +92,8 @@ class UserApiImpl extends UserApi {
   Future<bool> sellUserApi(
     String name,
     int kitta,
-    int buyprice,
-    String buydatetime,
+    int sellrice,
+    String selldatetime,
   ) async {
     final localstorage = s1<Localstorage>();
     String? token = await localstorage.getToken();
@@ -104,10 +104,13 @@ class UserApiImpl extends UserApi {
         data: {
           "name": name,
           "kitta": kitta,
-          "buyprice": buyprice,
-          "buydatetime": buydatetime,
+          "sellprice": sellrice,
+          "selldatetime": selldatetime,
         },
       );
+      print('================');
+      print(response.statusCode);
+      print('===============');
       if (response.statusCode == 200) {
         return true;
       } else {

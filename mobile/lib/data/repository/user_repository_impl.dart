@@ -35,10 +35,10 @@ class UserRepositoryImpl extends UserRepository {
   Future<bool> sellUser(
     String name,
     int kitta,
-    int buyprice,
-    String buydatetime,
+    int sellprice,
+    String selldatetime,
   ) {
-    return userApi.sellUserApi(name, kitta, buyprice, buydatetime);
+    return userApi.sellUserApi(name, kitta, sellprice, selldatetime);
   }
 
   @override

@@ -128,7 +128,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                 ElevatedButton(
                   onPressed: () async {
                     final userrepo = s1<UserRepository>();
-                    bool responce = await userrepo.addUser(
+                    bool responce = await userrepo.sellUser(
                       name1.text,
                       int.parse(kitta1.text),
                       int.parse(buyprice1.text),
@@ -143,7 +143,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                           context: context,
                           builder: (_) {
                             return AlertDialog(
-                              content: Text('error in buying'),
+                              content: Text('error in selling'),
                               actions: [
                                 ElevatedButton(
                                   onPressed: () {
@@ -158,7 +158,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                       }
                     }
                   },
-                  child: Text('buy'),
+                  child: Text('sell'),
                 ),
               ],
             ),

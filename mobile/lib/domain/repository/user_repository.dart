@@ -14,8 +14,8 @@ abstract class UserRepository {
   Future<bool> sellUser(
     String name,
     int kitta,
-    int buyprice,
-    String buydatetime,
+    int sellprice,
+    String selldatetime,
   );
 
   Future<bool> deletescrip(String name);

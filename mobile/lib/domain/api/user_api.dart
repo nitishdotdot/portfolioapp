@@ -9,8 +9,8 @@ abstract class UserApi {
   Future<bool> sellUserApi(
     String name,
     int kitta,
-    int buyprice,
-    String buytime,
+    int sellprice,
+    String selltime,
   );
   Future<List<AlluserModel>> getallUserApi();
   Future<bool> deletescrip(String scripname);

@@ -5,13 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import { stringify } from "node:querystring";
-import { broadcast } from "node:stream/iter";
-import { cp } from "node:fs";
 import { Decimal } from "@prisma/client/runtime/client";
-import { DatabaseSync } from "node:sqlite";
-import { brotliDecompressSync } from "node:zlib";
-import { json } from "node:stream/consumers";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -253,46 +247,172 @@ app.post("/buyscrip", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
-// app.post("/sellscrip", async (req, res) => {
-//   try {
-//     const jwtToken = req.headers["authorization"]?.split(" ")[1];
-//     if (jwtToken == null) {
-//       res.status(400).send("require token");
-//       return;
-//     }
-//     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
-//     const data = req.body;
-//     let wacc;
-//     try {
-//       if (data.name && data.sellscrip && data.kitta && data.selldatetime) {
-//         const scripName = (data.name as string).trim().toUpperCase();
-//         const user = await prisma.buyscrip.findFirst({
-//           where: { name: scripName },
-//         });
-//         if (user != null) {
-//           const user = prisma.sellscrip.findFirst({
-//             where: { name: scripName },
-//           });
-//           if (user != null) {
-//           }
-//           //normal sell
-//           res.send("ok");
-//           return;
-//         } else {
-//           res.status(404).send("cannot sell before buy");
-//           return;
-//         }
-//       } else {
-//         res.send("wrong body");
-//       }
-//     } catch (e) {
-//       console.log(e);
-//       res.status(404).send("server error");
-//     }
-//   } catch (e) {
-//     res.status(400).send("invalid token");
-//   }
-// });
+app.post("/sellscrip", async (req, res) => {
+  try {
+    const jwtToken = req.headers["authorization"]?.split(" ")[1];
+    if (jwtToken == null) {
+      res.status(400).send("require token");
+      return;
+    }
+    const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
+    const data = req.body;
+    let wacc;
+    try {
+      if (data.name && data.sellprice && data.kitta && data.selldatetime) {
+        const scripName = (data.name as string).trim().toUpperCase();
+        const buyscrip = await prisma.buyscrip.findFirst({
+          where: { name: scripName, userid: Number((decoded as any).id) },
+        });
+        const sellscriphistory = await prisma.sellscriphistory.findMany({
+          where: { name: scripName, userid: Number((decoded as any).id) },
+        });
+        if (data.kitta > buyscrip!.kitta) {
+          res.status(400).send("cannot sell");
+          return;
+        }
+        if (sellscriphistory.length > 0) {
+          // const sellscrip = await prisma.sellscrip.findFirst({
+          //   where: { name: scripName, userid: Number((decoded as any).id) },
+          // });
+          const buyscrip = await prisma.buyscrip.findFirst({
+            where: { userid: Number((decoded as any).id), name: scripName },
+          });
+          for (const scrips of sellscriphistory) {
+            const date1 = data.selldatetime.split("T")[0];
+            const date2 = scrips.selldatetime.toISOString().split("T")[0];
+            if (date1 == date2) {
+              const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+              const sebComm = tax?.sebComm as Decimal;
+              const brComm = tax?.brComm as Decimal;
+              const total =
+                data.sellprice * data.kitta -
+                data.sellprice *
+                  data.kitta *
+                  Number(brComm?.plus(sebComm).times(1 / 100));
+              const profit = total - Number(buyscrip!.wacc) * data.kitta;
+              await prisma.sellscriphistory.create({
+                data: {
+                  name: scripName,
+                  userid: Number((decoded as any).id),
+                  sellprice: data.sellprice,
+                  kitta: data.kitta,
+                  selldatetime: data.selldatetime,
+                  wacc: total / data.kitta,
+                  total: total,
+                  profit: profit,
+                },
+              });
+              const leftkitta = Number(buyscrip!.kitta) - data.kitta;
+              leftkitta == 0
+                ? await prisma.buyscrip.deleteMany({
+                    where: { userid: (decoded as any).id, name: scripName },
+                  })
+                : await prisma.buyscrip.update({
+                    where: {
+                      id: buyscrip?.id,
+                      userid: Number((decoded as any).id),
+                    },
+                    data: {
+                      kitta: leftkitta,
+                      total: leftkitta * Number(buyscrip!.wacc),
+                    },
+                  });
+              res.send("ok");
+              return;
+            }
+          }
+          const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+          const sebComm = tax?.sebComm as Decimal;
+          const brComm = tax?.brComm as Decimal;
+          const dpCharge = tax?.dpCharge as number;
+          const total =
+            data.sellprice * data.kitta -
+            data.sellprice *
+              data.kitta *
+              Number(brComm?.plus(sebComm).times(1 / 100)) -
+            dpCharge;
+          const profit = total - Number(buyscrip!.wacc) * data.kitta;
+          await prisma.sellscriphistory.create({
+            data: {
+              name: scripName,
+              userid: Number((decoded as any).id),
+              sellprice: data.sellprice,
+              kitta: data.kitta,
+              selldatetime: data.selldatetime,
+              wacc: total / data.kitta,
+              total: total,
+              profit: profit,
+            },
+          });
+          const leftkitta = Number(buyscrip!.kitta) - data.kitta;
+          leftkitta == 0
+            ? await prisma.buyscrip.deleteMany({
+                where: { userid: (decoded as any).id, name: scripName },
+              })
+            : await prisma.buyscrip.update({
+                where: {
+                  id: buyscrip?.id,
+                  userid: Number((decoded as any).id),
+                },
+                data: {
+                  kitta: leftkitta,
+                  total: leftkitta * Number(buyscrip!.wacc),
+                },
+              });
+          res.send("ok");
+          return;
+        }
+
+        const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+        const sebComm = tax?.sebComm as Decimal;
+        const brComm = tax?.brComm as Decimal;
+        const dpCharge = tax?.dpCharge as number;
+        const total =
+          data.sellprice * data.kitta -
+          data.sellprice *
+            data.kitta *
+            Number(brComm?.plus(sebComm).times(1 / 100)) -
+          dpCharge;
+        const wacc = total / data.kitta;
+        const profit = total - Number(buyscrip!.wacc) * data.kitta;
+        const name = (data.name as string).trim().toUpperCase();
+        await prisma.sellscriphistory.create({
+          data: {
+            name: name,
+            userid: Number((decoded as any).id),
+            sellprice: data.sellprice,
+            kitta: data.kitta,
+            selldatetime: data.selldatetime,
+            wacc: Number(wacc),
+            total: total,
+            profit: profit,
+          },
+        });
+        const leftkitta = Number(buyscrip!.kitta) - data.kitta;
+
+        leftkitta == 0
+          ? await prisma.buyscrip.deleteMany({
+              where: { userid: (decoded as any).id, name: name },
+            })
+          : await prisma.buyscrip.update({
+              where: { id: buyscrip?.id, userid: Number((decoded as any).id) },
+              data: {
+                kitta: leftkitta,
+                total: leftkitta * Number(buyscrip!.wacc),
+              },
+            });
+        res.send("done");
+      } else {
+        res.status(400).send("wrong body");
+      }
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
 app.delete("/deleteuser", async (req, res) => {
   try {
     const jwtToken = req.headers["authorization"]?.split(" ")[1];
@@ -315,31 +435,7 @@ app.delete("/deleteuser", async (req, res) => {
     }
   } catch (e) {}
 });
-// app.delete("/deletescrip", async (req, res) => {
-//   try {
-//     const jwtToken = req.headers["authorization"]?.split(" ")[1];
-//     if (jwtToken == null) {
-//       res.status(400).send("require token");
-//       return;
-//     }
-//     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
-//     const userid = (decoded as any).userid;
-//     const data = req.body;
-//     try {
-//       if (data.id) {
-//         await prisma.buyscrip.delete({
-//           where: { id: data.id, userid: data.userid },
-//         });
-//         res.send("done");
-//       } else {
-//         res.send("wrong body");
-//       }
-//     } catch (e) {
-//       console.log(e);
-//       res.status(404).send("server error");
-//     }
-//   } catch (e) {}
-// });
+
 app.get("/user", async (req, res) => {
   try {
     const header = req.headers["authorization"];
@@ -393,6 +489,22 @@ app.delete("/deletescrip", async (req, res) => {
       await prisma.buyscrip.deleteMany({
         where: { userid: Number(id), name: data.scripName },
       });
+      const issold = await prisma.sellscrip.findFirst({
+        where: { userid: Number(id), name: data.scripName },
+      });
+      if (issold) {
+        await prisma.sellscrip.deleteMany({
+          where: { userid: Number(id), name: data.scripName },
+        });
+      }
+      const issoldhistory = await prisma.sellscriphistory.findMany({
+        where: { userid: Number(id), name: data.scripName },
+      });
+      if (issoldhistory) {
+        await prisma.sellscriphistory.deleteMany({
+          where: { userid: Number(id), name: data.scripName },
+        });
+      }
       res.send("ok");
     } else {
       res.status(400).send("wrong body");
