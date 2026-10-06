@@ -20,8 +20,7 @@ model user {
   googleId String?
   photoUrl String?
   password String? 
-  buyscrips buyscrip[]
-  sellscrips sellscrip[]
+  buyscrips buyscrip[] 
   buyscriphistory buyscriphistory[]
   sellscriphistory sellscriphistory[]
 }
@@ -46,16 +45,7 @@ model buyscriphistory {
   total Decimal @db.Decimal(10,3)
   relation user     @relation(fields: [userid], references: [id])
 } 
-model sellscrip {
-  id       Int      @id @default(autoincrement())
-  name     String
-  userid   Int 
-  kitta    Int 
-  wacc Decimal @db.Decimal(10,3)
-  total Decimal @db.Decimal(10,3)
-  profit Decimal @db.Decimal(10,3)
-  relation user     @relation(fields: [userid], references: [id])
-}
+ 
 model sellscriphistory {
   id       Int      @id @default(autoincrement())
   name     String
