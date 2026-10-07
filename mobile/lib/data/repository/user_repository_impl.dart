@@ -1,6 +1,8 @@
 import 'package:portfolioapp/data/models/alluser_model.dart';
+import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
 import 'package:portfolioapp/domain/api/user_api.dart';
+import 'package:portfolioapp/data/models/buy_scrip_history_model.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
 
 class UserRepositoryImpl extends UserRepository {
@@ -44,5 +46,15 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<bool> deletescrip(String name) {
     return userApi.deletescrip(name);
+  }
+
+  @override
+  Future<List<BuyScripHistoryModel>> buyscripHistory() async {
+    return await userApi.buyscripHistoryApi();
+  }
+
+  @override
+  Future<List<SellScripHistoryModel>> sellScripHistory() async {
+    return await userApi.sellScripHistoryApi();
   }
 }

@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 import { Decimal } from "@prisma/client/runtime/client";
 const app = express();
 dotenv.config();
@@ -461,6 +461,54 @@ app.get("/user", async (req, res) => {
             },
           },
         },
+      });
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
+
+app.get("/buyscriphistory", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const email = (decoded as any).email;
+    try {
+      const response = await prisma.buyscriphistory.findMany({
+        where: { userid: Number((decoded as any).id) },
+        select: { name: true, kitta: true, buydatetime: true, buyprice: true },
+      });
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
+app.get("/sellscriphistory", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const email = (decoded as any).email;
+    try {
+      const response = await prisma.sellscriphistory.findMany({
+        where: { userid: Number((decoded as any).id) },
       });
       res.send(response);
     } catch (e) {

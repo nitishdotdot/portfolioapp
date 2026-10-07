@@ -12,6 +12,7 @@ import 'package:portfolioapp/main.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
+import 'package:portfolioapp/presentation/pages/history.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:portfolioapp/presentation/pages/profile_page.dart';
@@ -411,7 +412,14 @@ class _PortfolioappState extends State<Portfolioapp> {
                   leading: Icon(Icons.monetization_on),
                   title: Text('My Shares'),
                 ),
-                ListTile(leading: Icon(Icons.history), title: Text('History')),
+                ListTile(
+                  leading: Icon(Icons.history),
+                  title: Text('History'),
+                  onTap: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => History()),
+                  ),
+                ),
                 Divider(thickness: 2),
                 Align(alignment: Alignment.topLeft, child: Text('About ')),
                 ListTile(
