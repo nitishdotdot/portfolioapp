@@ -12,6 +12,7 @@ import 'package:portfolioapp/main.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
+import 'package:portfolioapp/presentation/pages/faq.dart';
 import 'package:portfolioapp/presentation/pages/history.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -80,6 +81,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                     ),
                   ),
                 ),
+                // Card(child: TextFormField()),
                 TextFormField(
                   controller: kitta1,
                   decoration: InputDecoration(
@@ -425,6 +427,12 @@ class _PortfolioappState extends State<Portfolioapp> {
                 ListTile(
                   leading: Icon(Icons.question_mark_sharp),
                   title: Text('Faqs'),
+                  onTap: () => {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => Faq()),
+                    ),
+                  },
                 ),
                 ListTile(
                   leading: Icon(Icons.phone_android),
@@ -456,14 +464,21 @@ class _PortfolioappState extends State<Portfolioapp> {
                       subtitle: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('unit= ${scrips[i - 1].kitta}'),
-                              Text('Wacc=${scrips[i - 1].wacc}'),
-                              Text('total=${scrips[i - 1].total}'),
-                            ],
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(scrips[i - 1].companyName, softWrap: true),
+                                Text('unit= ${scrips[i - 1].kitta}'),
+                                Text('Wacc=${scrips[i - 1].wacc}'),
+                                Text('total=${scrips[i - 1].total}'),
+                                Text('ltp=${scrips[i - 1].ltp}'),
+                                Text(
+                                  'currentPofit=${scrips[i - 1].currentProfit}',
+                                ),
+                              ],
+                            ),
                           ),
                           Column(
                             children: [

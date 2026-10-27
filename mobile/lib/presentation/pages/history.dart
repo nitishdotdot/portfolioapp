@@ -21,6 +21,9 @@ class _HistoryState extends State<History> {
     super.initState();
     buyHistory();
     sellHistory();
+    setState(() {
+      i = 0;
+    });
   }
 
   void buyHistory() async {
@@ -40,6 +43,7 @@ class _HistoryState extends State<History> {
     });
   }
 
+  int? i;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,57 +57,141 @@ class _HistoryState extends State<History> {
           },
           icon: Icon(Icons.arrow_back),
         ),
-        title: Text('History'),
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: buyscriphistory.length,
-              itemBuilder: (BuildContext context, int i) {
-                final item = buyscriphistory[i];
-                return MyCard(
-                  child: ListTile(
-                    title: Text(item.name),
-                    subtitle: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.kitta.toString()),
-                        Text(item.buyprice.toString()),
-                        Text(item.buydatetime.toString().split('T')[0]),
-                      ],
-                    ),
-                  ),
-                );
-              },
+        actions: [
+          MyCard(
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      i = 1;
+                    });
+                  },
+                  child: Text('BUY'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      i = 2;
+                    });
+                  },
+                  child: Text('SELL'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      i = 0;
+                    });
+                  },
+                  child: Text('ALL'),
+                ),
+              ],
             ),
           ),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: sellscriphistory.length,
-              itemBuilder: (BuildContext context, int i) {
-                final item = sellscriphistory[i];
-                return MyCard(
-                  child: ListTile(
-                    title: Text(item.name),
-                    subtitle: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.kitta.toString()),
-                        Text(item.sellpice.toString()),
-                        Text(item.selldatetime.toString().split('T')[0]),
-                      ],
-                    ),
+        ],
+        title: Text('History'),
+      ),
+      body: IndexedStack(
+        index: i,
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: buyscriphistory.length,
+                  itemBuilder: (BuildContext context, int i) {
+                    final item = buyscriphistory[i];
+                    return MyCard(
+                      child: ListTile(
+                        title: Text(item.name),
+                        subtitle: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item.kitta.toString()),
+                            Text(item.buyprice.toString()),
+                            Text(item.buydatetime.toString().split('T')[0]),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: sellscriphistory.length,
+                  itemBuilder: (BuildContext context, int i) {
+                    final item = sellscriphistory[i];
+                    return MyCard(
+                      child: ListTile(
+                        title: Text(item.name),
+                        subtitle: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(item.kitta.toString()),
+                            Text(item.sellpice.toString()),
+                            Text(item.selldatetime.toString().split('T')[0]),
+                            Text(item.profit.toString()),
+                            Text(item.total.toString()),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: buyscriphistory.length,
+            itemBuilder: (BuildContext context, int i) {
+              final item = buyscriphistory[i];
+              return MyCard(
+                child: ListTile(
+                  title: Text(item.name),
+                  subtitle: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.kitta.toString()),
+                      Text(item.buyprice.toString()),
+                      Text(item.buydatetime.toString().split('T')[0]),
+                    ],
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          ),
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: sellscriphistory.length,
+            itemBuilder: (BuildContext context, int i) {
+              final item = sellscriphistory[i];
+              return MyCard(
+                child: ListTile(
+                  title: Text(item.name),
+                  subtitle: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.kitta.toString()),
+                      Text(item.sellpice.toString()),
+                      Text(item.selldatetime.toString().split('T')[0]),
+                      Text(item.profit.toString()),
+                      Text(item.total.toString()),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

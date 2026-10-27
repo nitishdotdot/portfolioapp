@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
@@ -16,7 +17,7 @@ class AuthApiImpl extends AuthApi {
         '$url/signin',
         data: {'email': email, 'password': password},
       );
-      print('-------${response.data}');
+      debugPrint('-------${response.data}');
       if (response.statusCode == 200) {
         final localstorage = s1<Localstorage>();
         await localstorage.saveToken(response.data);

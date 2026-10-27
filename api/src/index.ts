@@ -6,6 +6,7 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt, { decode } from "jsonwebtoken";
 import { Decimal } from "@prisma/client/runtime/client";
+import { promiseHooks } from "node:v8";
 const app = express();
 dotenv.config();
 const googleAuth = new OAuth2Client(
@@ -16,6 +17,17 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 app.listen(process.env.PORT);
 app.use(express.json());
+async function getLtp(stockName) {
+  const response = await fetch(
+    `https://sharebazaar.vercel.app/api?symbol=${stockName}`,
+  );
+
+  if (response.status == 200) {
+    const data = await response.json();
+    console.log(data.ltp);
+    return { ltp: data.ltp, company_name: data.company_name };
+  }
+}
 app.get("/", (req, res) => res.send("server running"));
 app.post("/googlesignin", async (req, res) => {
   const name = req.body.name;
@@ -88,7 +100,9 @@ app.post("/signup", async (req, res) => {
 app.post("/signin", async (req, res) => {
   const data = req.body;
   if (data.email && data.password) {
-    const user = await prisma.user.findUnique({ where: { email: data.email } });
+    const user = await prisma.user.findUnique({
+      where: { email: data.email.trim("") },
+    });
     if (user == null) {
       res.sendStatus(404);
       return;
@@ -289,7 +303,7 @@ app.post("/sellscrip", async (req, res) => {
                 data.sellprice *
                   data.kitta *
                   Number(brComm?.plus(sebComm).times(1 / 100));
-              const profit = total - Number(buyscrip!.wacc) * data.kitta;
+              let profit = total - Number(buyscrip!.wacc) * data.kitta;
               await prisma.sellscriphistory.create({
                 data: {
                   name: scripName,
@@ -462,7 +476,32 @@ app.get("/user", async (req, res) => {
           },
         },
       });
-      res.send(response);
+      const response1 = {
+        ...response,
+        buyscrips: await Promise.all(
+          (response?.buyscrips ?? []).map(async (buyscrip) => {
+            const { ltp, company_name } = await getLtp(buyscrip.name);
+            const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+            const sebComm = tax?.sebComm as Decimal;
+            const brComm = tax?.brComm as Decimal;
+            const total =
+              ltp * buyscrip.kitta -
+              ltp *
+                buyscrip.kitta *
+                Number(brComm?.plus(sebComm).times(1 / 100)) -
+              Number(tax?.dpCharge);
+            const currentProfit = total - Number(buyscrip!.total);
+            return {
+              ...buyscrip,
+              ltp,
+              currentProfit,
+              company_name,
+            };
+          }),
+        ),
+      };
+
+      res.send(response1);
     } catch (e) {
       console.log(e);
       res.status(404).send("server error");
@@ -537,14 +576,7 @@ app.delete("/deletescrip", async (req, res) => {
       await prisma.buyscrip.deleteMany({
         where: { userid: Number(id), name: data.scripName },
       });
-      const issold = await prisma.sellscrip.findFirst({
-        where: { userid: Number(id), name: data.scripName },
-      });
-      if (issold) {
-        await prisma.sellscrip.deleteMany({
-          where: { userid: Number(id), name: data.scripName },
-        });
-      }
+
       const issoldhistory = await prisma.sellscriphistory.findMany({
         where: { userid: Number(id), name: data.scripName },
       });
