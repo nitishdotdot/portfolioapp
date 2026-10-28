@@ -1,0 +1,584 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:portfolioapp/core/di/injection_container.dart';
+import 'package:portfolioapp/data/datasource/local/localstorage.dart';
+import 'package:portfolioapp/data/models/scrip_model.dart';
+import 'package:portfolioapp/data/models/user_model.dart';
+import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
+import 'package:portfolioapp/domain/api/user_api.dart';
+import 'package:portfolioapp/domain/repository/auth_repository.dart';
+import 'package:portfolioapp/domain/repository/user_repository.dart';
+import 'package:portfolioapp/main.dart';
+import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
+import 'package:portfolioapp/presentation/bloc/login_event.dart';
+import 'package:portfolioapp/presentation/bloc/login_state.dart';
+import 'package:portfolioapp/presentation/pages/faq.dart';
+import 'package:portfolioapp/presentation/pages/history.dart';
+import 'package:portfolioapp/presentation/pages/loginpage.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:portfolioapp/presentation/pages/profile_page.dart';
+import 'package:portfolioapp/presentation/pages/settings.dart';
+import 'package:portfolioapp/presentation/widget/card.dart';
+
+class Portfolioapp extends StatefulWidget {
+  const Portfolioapp({super.key});
+
+  @override
+  State<Portfolioapp> createState() => _PortfolioappState();
+}
+
+class _PortfolioappState extends State<Portfolioapp> {
+  final userApi = s1<UserApi>();
+
+  TextEditingController name1 = TextEditingController();
+  TextEditingController kitta1 = TextEditingController();
+  TextEditingController buyprice1 = TextEditingController();
+  String? token;
+  String? email;
+  int? l;
+  String? name;
+  DateTime? datetime;
+  String? date;
+  String? holdings;
+  List<ScripModel> scrips = [];
+  @override
+  void initState() {
+    super.initState();
+    getUerData();
+  }
+
+  Future<bool> deletescrip(String scripname) async {
+    final userapi = s1<UserRepository>();
+    return await userapi.deletescrip(scripname);
+  }
+
+  void sellmodelButtomSheet() {
+    showModalBottomSheet(
+      enableDrag: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            10,
+            10,
+            10,
+            MediaQuery.of(context).viewInsets.bottom + 10,
+          ),
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Sell Share'),
+                TextFormField(
+                  controller: name1,
+                  decoration: InputDecoration(
+                    labelText: 'name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                // Card(child: TextFormField()),
+                TextFormField(
+                  controller: kitta1,
+                  decoration: InputDecoration(
+                    labelText: 'quantity',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: buyprice1,
+                  decoration: InputDecoration(
+                    labelText: 'price',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          datetime =
+                              await showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 365),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
+                              ) ??
+                              DateTime.now();
+                          setState(() {
+                            date = (datetime ?? DateTime.now())
+                                .toUtc()
+                                .toIso8601String();
+                          });
+                        },
+                        child: Text(datetime.toString().split(' ')[0]),
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final userrepo = s1<UserRepository>();
+                    bool responce = await userrepo.sellUser(
+                      name1.text,
+                      int.parse(kitta1.text),
+                      int.parse(buyprice1.text),
+                      (datetime ?? DateTime.now()).toUtc().toIso8601String(),
+                    );
+                    if (context.mounted) {
+                      if (responce == true) {
+                        getUerData();
+                        Navigator.pop(context);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              content: Text('error in selling'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('ok'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                  child: Text('sell'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void buymodelButtomSheet() {
+    showModalBottomSheet(
+      enableDrag: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            10,
+            10,
+            10,
+            MediaQuery.of(context).viewInsets.bottom + 10,
+          ),
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Buy Share'),
+                TextFormField(
+                  controller: name1,
+                  decoration: InputDecoration(
+                    labelText: 'name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: kitta1,
+                  decoration: InputDecoration(
+                    labelText: 'quantity',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                TextFormField(
+                  controller: buyprice1,
+                  decoration: InputDecoration(
+                    labelText: 'price',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: FloatingActionButton(
+                        onPressed: () async {
+                          datetime =
+                              await showDatePicker(
+                                context: context,
+                                firstDate: DateTime.now().subtract(
+                                  const Duration(days: 365),
+                                ),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 365),
+                                ),
+                              ) ??
+                              DateTime.now();
+                          setState(() {
+                            date = (datetime ?? DateTime.now())
+                                .toUtc()
+                                .toIso8601String();
+                          });
+                        },
+                        child: Text(datetime.toString().split(' ')[0]),
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final userrepo = s1<UserRepository>();
+                    bool responce = await userrepo.addUser(
+                      name1.text,
+                      int.parse(kitta1.text),
+                      int.parse(buyprice1.text),
+                      (datetime ?? DateTime.now()).toUtc().toIso8601String(),
+                    );
+                    if (context.mounted) {
+                      if (responce == true) {
+                        getUerData();
+                        Navigator.pop(context);
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              content: Text('error in buying'),
+                              actions: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('ok'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
+                    }
+                  },
+                  child: Text('buy'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void getUerData() async {
+    final userrepo = s1<UserRepository>();
+    UserModel userModel = await userrepo.userData();
+    setState(() {
+      email = userModel.email;
+      name = userModel.name;
+      scrips = userModel.scrip;
+    });
+  }
+
+  void refresh() {
+    getUerData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = MediaQuery.of(context).size;
+    final w = s.width;
+    final h = s.height;
+
+    int currentIndex = 0;
+    return Scaffold(
+      appBar: AppBar(
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              refresh();
+            },
+            child: Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      drawer: Drawer(
+        width: w * .9,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsetsGeometry.fromLTRB(10, 40, 0, 40),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.arrow_back),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            content: Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Are you sure'),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      final authrepo = s1<AuthRepository>();
+                                      authrepo.googleSignOut();
+                                      if (context.mounted) {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => Loginpage(),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Text('ok'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      icon: Icon(Icons.logout),
+                    ),
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //Image.network(),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [],
+                    ),
+                  ],
+                ),
+                Divider(thickness: 2),
+                ListTile(
+                  onTap: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => ProfilePage(),
+                    ),
+                  ),
+                  leading: Icon(Icons.person),
+                  title: Text('$name'),
+                  subtitle: Text('$email'),
+                ),
+                Divider(thickness: 2),
+                Align(alignment: Alignment.topLeft, child: Text('Seetings')),
+                ListTile(
+                  leading: Icon(Icons.settings),
+                  title: Text('setting'),
+                  onTap: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => Settings()),
+                  ),
+                ),
+                Divider(thickness: 2),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Text('My Portfolio'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.monetization_on),
+                  title: Text('My Shares'),
+                ),
+                ListTile(
+                  leading: Icon(Icons.history),
+                  title: Text('History'),
+                  onTap: () => Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => History()),
+                  ),
+                ),
+                Divider(thickness: 2),
+                Align(alignment: Alignment.topLeft, child: Text('About ')),
+                ListTile(
+                  leading: Icon(Icons.question_mark_sharp),
+                  title: Text('Faqs'),
+                  onTap: () => {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => Faq()),
+                    ),
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.phone_android),
+                  title: Text('About'),
+                ),
+                ListTile(leading: Icon(Icons.android), title: Text('Version')),
+              ],
+            ),
+          ),
+        ),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: scrips.length + 1,
+                itemBuilder: (BuildContext context, int i) {
+                  if (i == 0) {
+                    return Card(
+                      color: Colors.pink,
+                      child: SizedBox(width: w, height: h * .2),
+                    );
+                  }
+                  return MyCard(
+                    child: ListTile(
+                      leading: Icon(Icons.house),
+                      title: Text(scrips[i - 1].name),
+                      subtitle: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(scrips[i - 1].companyName, softWrap: true),
+                                Text('unit= ${scrips[i - 1].kitta}'),
+                                Text('Wacc=${scrips[i - 1].wacc}'),
+                                Text('total=${scrips[i - 1].total}'),
+                                Text('ltp=${scrips[i - 1].ltp}'),
+                                Text(
+                                  'currentPofit=${scrips[i - 1].currentProfit}',
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    onPressed: () => {buymodelButtomSheet()},
+                                    icon: Icon(Icons.add_circle_outlined),
+                                  ),
+                                  IconButton(
+                                    onPressed: () => {sellmodelButtomSheet()},
+                                    icon: Icon(Icons.remove_circle),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      onLongPress: () async {
+                        showDialog(
+                          context: context,
+                          builder: (_) {
+                            return AlertDialog(
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Are you sure to delete this scrip'),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          final deleted = await deletescrip(
+                                            scrips[i - 1].name,
+                                          );
+                                          if (context.mounted) {
+                                            if (deleted) {
+                                              refresh();
+                                              Navigator.pop(context);
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'error in deleting scrip',
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                        child: Text('yes'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: Text('no'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (x) {
+            if (x == 1) {
+              setState(() {
+                currentIndex = x;
+              });
+              buymodelButtomSheet();
+            }
+          },
+          backgroundColor: Colors.red.withAlpha(50),
+          elevation: 10,
+          items: [
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+          ],
+        ),
+      ),
+    );
+  }
+}

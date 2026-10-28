@@ -55,7 +55,8 @@ model sellscriphistory {
   selldatetime  DateTime 
   wacc Decimal @db.Decimal(10,3)
   total Decimal @db.Decimal(10,3)
-  profit Decimal @db.Decimal(10,3)
+  profit Decimal @db.Decimal(10,3) 
+   profitPercent Decimal @db.Decimal(10,3)
   relation user     @relation(fields: [userid], references: [id])
 }
 model tax{

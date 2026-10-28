@@ -304,6 +304,8 @@ app.post("/sellscrip", async (req, res) => {
                   data.kitta *
                   Number(brComm?.plus(sebComm).times(1 / 100));
               let profit = total - Number(buyscrip!.wacc) * data.kitta;
+              const profitPercent =
+                (profit * 100) / (Number(buyscrip!.wacc) * data.kitta);
               await prisma.sellscriphistory.create({
                 data: {
                   name: scripName,
@@ -314,6 +316,7 @@ app.post("/sellscrip", async (req, res) => {
                   wacc: total / data.kitta,
                   total: total,
                   profit: profit,
+                  profitPercent: profitPercent,
                 },
               });
               const leftkitta = Number(buyscrip!.kitta) - data.kitta;
@@ -346,6 +349,8 @@ app.post("/sellscrip", async (req, res) => {
               Number(brComm?.plus(sebComm).times(1 / 100)) -
             dpCharge;
           const profit = total - Number(buyscrip!.wacc) * data.kitta;
+          const profitPercent =
+            (profit * 100) / (Number(buyscrip!.wacc) * data.kitta);
           await prisma.sellscriphistory.create({
             data: {
               name: scripName,
@@ -356,6 +361,7 @@ app.post("/sellscrip", async (req, res) => {
               wacc: total / data.kitta,
               total: total,
               profit: profit,
+              profitPercent: profitPercent,
             },
           });
           const leftkitta = Number(buyscrip!.kitta) - data.kitta;
@@ -390,6 +396,8 @@ app.post("/sellscrip", async (req, res) => {
         const wacc = total / data.kitta;
         const profit = total - Number(buyscrip!.wacc) * data.kitta;
         const name = (data.name as string).trim().toUpperCase();
+        const profitPercent =
+          (profit * 100) / (Number(buyscrip!.wacc) * data.kitta);
         await prisma.sellscriphistory.create({
           data: {
             name: name,
@@ -400,6 +408,7 @@ app.post("/sellscrip", async (req, res) => {
             wacc: Number(wacc),
             total: total,
             profit: profit,
+            profitPercent: profitPercent,
           },
         });
         const leftkitta = Number(buyscrip!.kitta) - data.kitta;
@@ -490,12 +499,16 @@ app.get("/user", async (req, res) => {
                 buyscrip.kitta *
                 Number(brComm?.plus(sebComm).times(1 / 100)) -
               Number(tax?.dpCharge);
+            const companyName = company_name ?? "";
+            const invested = Number(buyscrip.total);
             const currentProfit = total - Number(buyscrip!.total);
             return {
               ...buyscrip,
               ltp,
+              total,
               currentProfit,
-              company_name,
+              companyName,
+              invested,
             };
           }),
         ),
@@ -549,6 +562,7 @@ app.get("/sellscriphistory", async (req, res) => {
       const response = await prisma.sellscriphistory.findMany({
         where: { userid: Number((decoded as any).id) },
       });
+
       res.send(response);
     } catch (e) {
       console.log(e);

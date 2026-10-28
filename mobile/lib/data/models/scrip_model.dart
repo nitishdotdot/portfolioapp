@@ -4,10 +4,11 @@ class ScripModel {
   String name;
   int kitta;
   String wacc;
-  String total;
-  double currentProfit;
+  num total;
+  num currentProfit;
   String companyName;
   num ltp;
+  num invested;
   ScripModel(
     this.name,
     this.kitta,
@@ -16,6 +17,7 @@ class ScripModel {
     this.currentProfit,
     this.companyName,
     this.ltp,
+    this.invested,
   );
   factory ScripModel.fromJson(Map<String, dynamic> json) {
     return ScripModel(
@@ -24,8 +26,9 @@ class ScripModel {
       json['wacc'],
       json['total'],
       json['currentProfit'],
-      json['company_name'],
+      json['companyName'],
       json['ltp'],
+      json['invested'],
     );
   }
 }

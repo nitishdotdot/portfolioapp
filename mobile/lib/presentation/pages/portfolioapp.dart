@@ -18,7 +18,14 @@ import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:portfolioapp/presentation/pages/profile_page.dart';
 import 'package:portfolioapp/presentation/pages/settings.dart';
-import 'package:portfolioapp/presentation/widget/card.dart';
+
+// New presentation-only files
+import 'package:portfolioapp/presentation/widget/floating_bottom_nav_bar.dart';
+import 'package:portfolioapp/presentation/widget/portfolio_graph.dart';
+import 'package:portfolioapp/presentation/widget/swipeable_scrip_card.dart';
+import 'package:portfolioapp/presentation/widget/widgets.dart';
+import 'package:portfolioapp/presentation/widget/app_drawer.dart';
+import 'package:portfolioapp/presentation/widget/trade_sheet.dart';
 
 class Portfolioapp extends StatefulWidget {
   const Portfolioapp({super.key});
@@ -40,7 +47,20 @@ class _PortfolioappState extends State<Portfolioapp> {
   DateTime? datetime;
   String? date;
   String? holdings;
+  double currentValue = 0;
+  double profit = 0;
+  double invested = 0;
   List<ScripModel> scrips = [];
+
+  // UI-only: selected tab in the floating navigation bar.
+  int currentIndex = 0;
+
+  static const List<FloatingNavItem> _navItems = [
+    FloatingNavItem(icon: Icons.pie_chart_rounded, label: 'Portfolio'),
+    FloatingNavItem(icon: Icons.add_circle_rounded, label: 'Buy'),
+    FloatingNavItem(icon: Icons.person_rounded, label: 'Profile'),
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -52,84 +72,57 @@ class _PortfolioappState extends State<Portfolioapp> {
     return await userapi.deletescrip(scripname);
   }
 
+  // ---------------------------------------------------------------------
+  // Existing buy / sell sheets: UNCHANGED
+  // ---------------------------------------------------------------------
+
   void sellmodelButtomSheet() {
     showModalBottomSheet(
       enableDrag: true,
       showDragHandle: true,
       isScrollControlled: true,
+      useSafeArea: true,
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            10,
-            10,
-            10,
-            MediaQuery.of(context).viewInsets.bottom + 10,
-          ),
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Sell Share'),
-                TextFormField(
-                  controller: name1,
-                  decoration: InputDecoration(
-                    labelText: 'name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                // Card(child: TextFormField()),
-                TextFormField(
-                  controller: kitta1,
-                  decoration: InputDecoration(
-                    labelText: 'quantity',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                TextFormField(
-                  controller: buyprice1,
-                  decoration: InputDecoration(
-                    labelText: 'price',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: FloatingActionButton(
-                        onPressed: () async {
-                          datetime =
-                              await showDatePicker(
-                                context: context,
-                                firstDate: DateTime.now().subtract(
-                                  const Duration(days: 365),
-                                ),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 365),
-                                ),
-                              ) ??
-                              DateTime.now();
-                          setState(() {
-                            date = (datetime ?? DateTime.now())
-                                .toUtc()
-                                .toIso8601String();
-                          });
-                        },
-                        child: Text(datetime.toString().split(' ')[0]),
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () async {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setSheetState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                10,
+                10,
+                10,
+                MediaQuery.of(context).viewInsets.bottom + 10,
+              ),
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: TradeSheet(
+                  isBuy: false,
+                  nameController: name1,
+                  quantityController: kitta1,
+                  priceController: buyprice1,
+                  dateText: datetime == null
+                      ? 'Select date'
+                      : datetime.toString().split(' ')[0],
+                  onPickDate: () async {
+                    datetime =
+                        await showDatePicker(
+                          context: context,
+                          firstDate: DateTime.now().subtract(
+                            const Duration(days: 365),
+                          ),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        ) ??
+                        DateTime.now();
+                    setState(() {
+                      date = (datetime ?? DateTime.now())
+                          .toUtc()
+                          .toIso8601String();
+                    });
+                    setSheetState(() {}); // refresh the date label in the sheet
+                  },
+                  onSubmit: () async {
                     final userrepo = s1<UserRepository>();
                     bool responce = await userrepo.sellUser(
                       name1.text,
@@ -161,11 +154,10 @@ class _PortfolioappState extends State<Portfolioapp> {
                       }
                     }
                   },
-                  child: Text('sell'),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -176,78 +168,48 @@ class _PortfolioappState extends State<Portfolioapp> {
       enableDrag: true,
       showDragHandle: true,
       isScrollControlled: true,
+      useSafeArea: true,
       context: context,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            10,
-            10,
-            10,
-            MediaQuery.of(context).viewInsets.bottom + 10,
-          ),
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Buy Share'),
-                TextFormField(
-                  controller: name1,
-                  decoration: InputDecoration(
-                    labelText: 'name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                TextFormField(
-                  controller: kitta1,
-                  decoration: InputDecoration(
-                    labelText: 'quantity',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                TextFormField(
-                  controller: buyprice1,
-                  decoration: InputDecoration(
-                    labelText: 'price',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: FloatingActionButton(
-                        onPressed: () async {
-                          datetime =
-                              await showDatePicker(
-                                context: context,
-                                firstDate: DateTime.now().subtract(
-                                  const Duration(days: 365),
-                                ),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 365),
-                                ),
-                              ) ??
-                              DateTime.now();
-                          setState(() {
-                            date = (datetime ?? DateTime.now())
-                                .toUtc()
-                                .toIso8601String();
-                          });
-                        },
-                        child: Text(datetime.toString().split(' ')[0]),
-                      ),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () async {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setSheetState) {
+            return Padding(
+              padding: EdgeInsets.fromLTRB(
+                10,
+                10,
+                10,
+                MediaQuery.of(context).viewInsets.bottom + 10,
+              ),
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: TradeSheet(
+                  isBuy: true,
+                  nameController: name1,
+                  quantityController: kitta1,
+                  priceController: buyprice1,
+                  dateText: datetime == null
+                      ? 'Select date'
+                      : datetime.toString().split(' ')[0],
+                  onPickDate: () async {
+                    datetime =
+                        await showDatePicker(
+                          context: context,
+                          firstDate: DateTime.now().subtract(
+                            const Duration(days: 365),
+                          ),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        ) ??
+                        DateTime.now();
+                    setState(() {
+                      date = (datetime ?? DateTime.now())
+                          .toUtc()
+                          .toIso8601String();
+                    });
+                    setSheetState(() {}); // refresh the date label in the sheet
+                  },
+                  onSubmit: () async {
                     final userrepo = s1<UserRepository>();
                     bool responce = await userrepo.addUser(
                       name1.text,
@@ -279,11 +241,10 @@ class _PortfolioappState extends State<Portfolioapp> {
                       }
                     }
                   },
-                  child: Text('buy'),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -296,285 +257,207 @@ class _PortfolioappState extends State<Portfolioapp> {
       email = userModel.email;
       name = userModel.name;
       scrips = userModel.scrip;
+      for (int i = 0; i < scrips.length; i++) {
+        currentValue += scrips[i].total;
+        invested += scrips[i].invested;
+        profit += scrips[i].currentProfit;
+      }
     });
   }
 
   void refresh() {
+    setState(() {
+      currentValue = 0;
+      invested = 0;
+      profit = 0;
+    });
     getUerData();
+  }
+
+  // Existing long-press delete flow, moved into a method (logic unchanged).
+  void confirmDeleteScrip(String scripName) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Are you sure to delete this scrip'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      final deleted = await deletescrip(scripName);
+                      if (context.mounted) {
+                        if (deleted) {
+                          refresh();
+                          Navigator.pop(context);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('error in deleting scrip')),
+                          );
+                        }
+                      }
+                    },
+                    child: Text('yes'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('no'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final s = MediaQuery.of(context).size;
     final w = s.width;
-    final h = s.height;
+    final pad = pagePadding(w);
 
-    int currentIndex = 0;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         actions: [
-          ElevatedButton(
+          IconButton(
             onPressed: () {
               refresh();
             },
-            child: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
-      drawer: Drawer(
-        width: w * .9,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsetsGeometry.fromLTRB(10, 40, 0, 40),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(Icons.arrow_back),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            content: Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('Are you sure'),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      final authrepo = s1<AuthRepository>();
-                                      authrepo.googleSignOut();
-                                      if (context.mounted) {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => Loginpage(),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: Text('ok'),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.logout),
-                    ),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //Image.network(),
-                    SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [],
-                    ),
-                  ],
-                ),
-                Divider(thickness: 2),
-                ListTile(
-                  onTap: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => ProfilePage(),
-                    ),
-                  ),
-                  leading: Icon(Icons.person),
-                  title: Text('$name'),
-                  subtitle: Text('$email'),
-                ),
-                Divider(thickness: 2),
-                Align(alignment: Alignment.topLeft, child: Text('Seetings')),
-                ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text('setting'),
-                  onTap: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => Settings()),
-                  ),
-                ),
-                Divider(thickness: 2),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text('My Portfolio'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.monetization_on),
-                  title: Text('My Shares'),
-                ),
-                ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('History'),
-                  onTap: () => Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => History()),
-                  ),
-                ),
-                Divider(thickness: 2),
-                Align(alignment: Alignment.topLeft, child: Text('About ')),
-                ListTile(
-                  leading: Icon(Icons.question_mark_sharp),
-                  title: Text('Faqs'),
-                  onTap: () => {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => Faq()),
-                    ),
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.phone_android),
-                  title: Text('About'),
-                ),
-                ListTile(leading: Icon(Icons.android), title: Text('Version')),
-              ],
-            ),
-          ),
+      drawer: AppDrawer(
+        name: name,
+        email: email,
+        onProfile: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (BuildContext context) => ProfilePage()),
         ),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: scrips.length + 1,
-                itemBuilder: (BuildContext context, int i) {
-                  if (i == 0) {
-                    return Card(
-                      color: Colors.pink,
-                      child: SizedBox(width: w, height: h * .2),
-                    );
-                  }
-                  return MyCard(
-                    child: ListTile(
-                      leading: Icon(Icons.house),
-                      title: Text(scrips[i - 1].name),
-                      subtitle: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(scrips[i - 1].companyName, softWrap: true),
-                                Text('unit= ${scrips[i - 1].kitta}'),
-                                Text('Wacc=${scrips[i - 1].wacc}'),
-                                Text('total=${scrips[i - 1].total}'),
-                                Text('ltp=${scrips[i - 1].ltp}'),
-                                Text(
-                                  'currentPofit=${scrips[i - 1].currentProfit}',
-                                ),
-                              ],
-                            ),
-                          ),
-                          Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    onPressed: () => {buymodelButtomSheet()},
-                                    icon: Icon(Icons.add_circle_outlined),
-                                  ),
-                                  IconButton(
-                                    onPressed: () => {sellmodelButtomSheet()},
-                                    icon: Icon(Icons.remove_circle),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      onLongPress: () async {
-                        showDialog(
-                          context: context,
-                          builder: (_) {
-                            return AlertDialog(
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('Are you sure to delete this scrip'),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      ElevatedButton(
-                                        onPressed: () async {
-                                          final deleted = await deletescrip(
-                                            scrips[i - 1].name,
-                                          );
-                                          if (context.mounted) {
-                                            if (deleted) {
-                                              refresh();
-                                              Navigator.pop(context);
-                                            } else {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    'error in deleting scrip',
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          }
-                                        },
-                                        child: Text('yes'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Text('no'),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+        onSettings: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => SettingsPage()),
         ),
-      ),
-
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (x) {
-          if (x == 1) {
-            setState(() {
-              currentIndex = x;
-            });
-            buymodelButtomSheet();
+        onHistory: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => History()),
+        ),
+        onFaq: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => Faq()),
+        ),
+        onLogoutConfirmed: () {
+          final authrepo = s1<AuthRepository>();
+          authrepo.googleSignOut();
+          if (context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => Loginpage()),
+            );
           }
         },
-        backgroundColor: Colors.red.withAlpha(50),
-        elevation: 10,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        ],
+      ),
+
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          // Keeps the dashboard readable on tablets / wide windows.
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: ListView.builder(
+            padding: EdgeInsets.fromLTRB(pad, 4, pad, 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: scrips.length + 3,
+            itemBuilder: (BuildContext context, int i) {
+              if (i == 0) {
+                // Portfolio totals are not exposed by the existing code, so
+                // they are left null (shown as an em dash). Pass your existing
+                // already-formatted values here when you have them.
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: PortfolioSummaryCard(
+                    userName: name,
+                    holdingsCount: scrips.length,
+                    currentValueText: currentValue.toStringAsFixed(3),
+                    investedText: invested.toStringAsFixed(3),
+                    profitText: profit.toStringAsFixed(3),
+                    profitValue: profit.toStringAsFixed(3),
+                    profitpercent: (profit * 100 / invested).toStringAsFixed(3),
+                  ),
+                );
+              }
+              if (i == 1) {
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: PortfolioGraph(),
+                );
+              }
+              if (i == 2) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: SectionHeader(
+                    title: 'My Holdings',
+                    trailing: Text(
+                      'Swipe → Buy   ← Sell',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(130),
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              final scrip = scrips[i - 3];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SwipeableScripCard(
+                  // Existing handlers, reused as-is. Swiping only opens the
+                  // sheet; nothing is submitted until the user confirms there.
+                  onBuy: buymodelButtomSheet,
+                  onSell: sellmodelButtomSheet,
+                  onLongPress: () => confirmDeleteScrip(scrip.name),
+                  child: ScripInfoCard(
+                    name: scrip.name,
+                    companyName: scrip.companyName,
+                    kitta: scrip.kitta,
+                    wacc: scrip.wacc,
+                    total: scrip.total.toStringAsFixed(3),
+                    ltp: scrip.ltp,
+                    currentProfit: scrip.currentProfit.toStringAsFixed(3),
+                    percentprofit:
+                        (scrip.currentProfit.toDouble() * 100 / scrip.invested)
+                            .toStringAsFixed(3),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+      bottomNavigationBar: FloatingBottomNavBar(
+        items: _navItems,
+        selectedIndex: currentIndex,
+        onTap: (x) {
+          // Same behaviour as before: only the middle tab opens the buy sheet.
+          if (x == 1) {
+            buymodelButtomSheet();
+          } else {
+            setState(() => currentIndex = x);
+          }
+        },
       ),
     );
   }
