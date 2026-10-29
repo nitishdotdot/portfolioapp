@@ -572,6 +572,56 @@ app.get("/sellscriphistory", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
+app.post("/faq", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const data = req.body;
+    if (data.question && data.answer) {
+      try {
+        const response = await prisma.faq.create({
+          data: { question: data.question, answer: data.answer },
+        });
+
+        res.send(response);
+      } catch (e) {
+        console.log(e);
+        res.status(404).send("server error");
+      }
+    } else {
+      res.status(400).send("wrong body");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
+app.get("/faq", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const data = req.body;
+    try {
+      const response = await prisma.faq.findMany({});
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
+
 app.delete("/deletescrip", async (req, res) => {
   try {
     const header = req.headers["authorization"];

@@ -1,4 +1,5 @@
 import 'package:portfolioapp/data/models/alluser_model.dart';
+import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
 import 'package:portfolioapp/data/models/buy_scrip_history_model.dart';
@@ -18,4 +19,5 @@ abstract class UserApi {
   Future<bool> deletescrip(String scripname);
   Future<List<BuyScripHistoryModel>> buyscripHistoryApi();
   Future<List<SellScripHistoryModel>> sellScripHistoryApi();
+  Future<List<FaqModel>> faqApi();
 }

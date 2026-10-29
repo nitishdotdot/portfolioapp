@@ -67,3 +67,8 @@ model tax{
   shortTax Decimal @db.Decimal(5,3)
   longTax Decimal @db.Decimal(5,3)
   }
+  model faq{
+    id Int @id @default(autoincrement())
+    question String
+    answer String
+  }

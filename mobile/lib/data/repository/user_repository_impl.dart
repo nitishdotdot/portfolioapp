@@ -1,4 +1,5 @@
 import 'package:portfolioapp/data/models/alluser_model.dart';
+import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
 import 'package:portfolioapp/domain/api/user_api.dart';
@@ -56,5 +57,10 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<List<SellScripHistoryModel>> sellScripHistory() async {
     return await userApi.sellScripHistoryApi();
+  }
+
+  @override
+  Future<List<FaqModel>> faq() async {
+    return await userApi.faqApi();
   }
 }
