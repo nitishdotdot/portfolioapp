@@ -15,6 +15,7 @@ class AppDrawer extends StatelessWidget {
     required this.onSettings,
     required this.onHistory,
     required this.onFaq,
+    required this.onVersion,
     required this.onLogoutConfirmed,
   });
 
@@ -22,6 +23,7 @@ class AppDrawer extends StatelessWidget {
   final String? email;
   final VoidCallback onProfile;
   final VoidCallback onSettings;
+  final VoidCallback onVersion;
   final VoidCallback onHistory;
   final VoidCallback onFaq;
   final VoidCallback onLogoutConfirmed;
@@ -65,7 +67,9 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final screenW = MediaQuery.of(context).size.width;
-    final displayName = (name == null || name!.isEmpty) ? 'Your profile' : name!;
+    final displayName = (name == null || name!.isEmpty)
+        ? 'Your profile'
+        : name!;
     final initial = displayName.characters.first.toUpperCase();
 
     return Drawer(
@@ -100,13 +104,17 @@ class AppDrawer extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: Colors.white,
+                      ),
                     ),
                     IconButton(
                       onPressed: () => _confirmLogout(context),
-                      icon: const Icon(Icons.logout_rounded,
-                          color: Colors.white),
+                      icon: const Icon(
+                        Icons.logout_rounded,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
@@ -163,8 +171,10 @@ class AppDrawer extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Icon(Icons.chevron_right_rounded,
-                            color: Colors.white70),
+                        const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.white70,
+                        ),
                       ],
                     ),
                   ),
@@ -212,9 +222,10 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.phone_android_rounded,
                   title: 'About',
                 ),
-                const _DrawerTile(
+                _DrawerTile(
                   icon: Icons.android_rounded,
                   title: 'Version',
+                  onTap: onVersion,
                 ),
               ],
             ),
@@ -280,7 +291,11 @@ class _DrawerTile extends StatelessWidget {
                 : cs.onSurface.withAlpha(14),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(icon, size: 20, color: accent.withAlpha(selected ? 255 : 190)),
+          child: Icon(
+            icon,
+            size: 20,
+            color: accent.withAlpha(selected ? 255 : 190),
+          ),
         ),
         title: Text(
           title,
@@ -293,8 +308,10 @@ class _DrawerTile extends StatelessWidget {
         ),
         trailing: onTap == null || selected
             ? null
-            : Icon(Icons.chevron_right_rounded,
-                color: cs.onSurface.withAlpha(100)),
+            : Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurface.withAlpha(100),
+              ),
       ),
     );
   }

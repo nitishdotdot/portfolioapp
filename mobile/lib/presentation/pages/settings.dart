@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
+import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'faq.dart'; // must contain the `Faq` class
 import 'package:portfolioapp/presentation/widget/widgets.dart';
 import 'package:portfolioapp/presentation/widget/settings_widgets.dart';
@@ -64,6 +65,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => Portfolioapp()),
+            );
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
         title: const Text(
           'Settings',
           style: TextStyle(fontWeight: FontWeight.w700),

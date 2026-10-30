@@ -16,7 +16,6 @@ import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:portfolioapp/presentation/pages/profile_page.dart';
-import 'package:portfolioapp/presentation/widget/card.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -57,11 +56,6 @@ class _AdminPageState extends State<AdminPage> {
     final s = MediaQuery.of(context).size;
     final w = s.width;
     final h = s.height;
-    TextEditingController name1 = TextEditingController();
-    TextEditingController kitta1 = TextEditingController();
-    TextEditingController buyprice1 = TextEditingController();
-
-    int currentIndex = 0;
     return Scaffold(
       appBar: AppBar(),
       drawer: Drawer(
@@ -180,12 +174,10 @@ class _AdminPageState extends State<AdminPage> {
                       child: SizedBox(width: w, height: h * .2),
                     );
                   }
-                  return MyCard(
-                    child: ListTile(
-                      leading: Icon(Icons.house),
-                      title: Text(allUser[i - 1].name),
-                      subtitle: Text(allUser[i - 1].email),
-                    ),
+                  return ListTile(
+                    leading: Icon(Icons.house),
+                    title: Text(allUser[i - 1].name),
+                    subtitle: Text(allUser[i - 1].email),
                   );
                 },
               ),

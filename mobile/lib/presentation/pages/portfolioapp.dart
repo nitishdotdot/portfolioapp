@@ -18,6 +18,7 @@ import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:portfolioapp/presentation/pages/profile_page.dart';
 import 'package:portfolioapp/presentation/pages/settings.dart';
+import 'package:portfolioapp/presentation/pages/version.dart';
 
 // New presentation-only files
 import 'package:portfolioapp/presentation/widget/floating_bottom_nav_bar.dart';
@@ -353,6 +354,7 @@ class _PortfolioappState extends State<Portfolioapp> {
           context,
           MaterialPageRoute(builder: (_) => History()),
         ),
+
         onFaq: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => Faq()),
@@ -367,6 +369,11 @@ class _PortfolioappState extends State<Portfolioapp> {
             );
           }
         },
+
+        onVersion: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => Version()),
+        ),
       ),
 
       body: Align(
