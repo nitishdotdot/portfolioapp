@@ -16,7 +16,7 @@ import 'package:portfolioapp/presentation/pages/faq.dart';
 import 'package:portfolioapp/presentation/pages/history.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:portfolioapp/presentation/pages/profile_page.dart';
+import 'package:portfolioapp/presentation/pages/profile.dart';
 import 'package:portfolioapp/presentation/pages/settings.dart';
 import 'package:portfolioapp/presentation/pages/version.dart';
 
@@ -461,6 +461,11 @@ class _PortfolioappState extends State<Portfolioapp> {
           // Same behaviour as before: only the middle tab opens the buy sheet.
           if (x == 1) {
             buymodelButtomSheet();
+          } else if (x == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => ProfilePage()),
+            );
           } else {
             setState(() => currentIndex = x);
           }

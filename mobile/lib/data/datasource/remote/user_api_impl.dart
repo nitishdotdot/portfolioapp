@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
+import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
 import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
@@ -208,6 +209,24 @@ class UserApiImpl extends UserApi {
       }
     } catch (e) {
       print(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<AboutUserModel> aboutUserApi() async {
+    final localstorage = s1<Localstorage>();
+    String? token = await localstorage.getToken();
+
+    try {
+      final response = await dio.get(
+        '${dotenv.get('BACKEND_URL')}/aboutUser',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      final aboutUserModel = AboutUserModel.fromJson(response.data);
+      return aboutUserModel;
+    } catch (e) {
+      print(e.toString());
       rethrow;
     }
   }

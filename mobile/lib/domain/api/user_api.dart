@@ -1,3 +1,4 @@
+import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
 import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
@@ -20,4 +21,5 @@ abstract class UserApi {
   Future<List<BuyScripHistoryModel>> buyscripHistoryApi();
   Future<List<SellScripHistoryModel>> sellScripHistoryApi();
   Future<List<FaqModel>> faqApi();
+  Future<AboutUserModel> aboutUserApi();
 }

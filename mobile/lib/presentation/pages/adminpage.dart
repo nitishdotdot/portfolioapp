@@ -15,7 +15,7 @@ import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:portfolioapp/presentation/pages/profile_page.dart';
+import 'package:portfolioapp/presentation/pages/profile.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
