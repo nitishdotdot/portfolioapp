@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
+import 'package:portfolioapp/data/models/brokerage_model.dart';
 import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
@@ -225,6 +226,25 @@ class UserApiImpl extends UserApi {
       );
       final aboutUserModel = AboutUserModel.fromJson(response.data);
       return aboutUserModel;
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
+  }
+
+  @override
+  Future<BrokerageModel> brokerageApi() async {
+    final localstorage = s1<Localstorage>();
+    String? token = await localstorage.getToken();
+
+    try {
+      final response = await dio.get(
+        '${dotenv.get('BACKEND_URL')}/brokerage',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      print(response);
+      final brokerageModel = BrokerageModel.fromJson(response.data);
+      return brokerageModel;
     } catch (e) {
       print(e.toString());
       rethrow;

@@ -1,5 +1,6 @@
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
+import 'package:portfolioapp/data/models/brokerage_model.dart';
 import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
@@ -68,5 +69,10 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<AboutUserModel> aboutuser() async {
     return await userApi.aboutUserApi();
+  }
+
+  @override
+  Future<BrokerageModel> brokerage() async {
+    return await userApi.brokerageApi();
   }
 }

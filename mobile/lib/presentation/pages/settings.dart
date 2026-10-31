@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolioapp/presentation/pages/brokerage.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
 import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
@@ -30,6 +31,10 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Every row routes here for now. Replace per row later.
   void _openFaq() {
     Navigator.push(context, MaterialPageRoute(builder: (_) => Faq()));
+  }
+
+  void _openBrokerage() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => Brokerage()));
   }
 
   void _opeProfile() {
@@ -139,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'Brokerage & fees',
                   subtitle: 'Commission, SEBON and DP charges',
                   iconColor: AppColors.buy,
-                  onTap: _openFaq,
+                  onTap: _openBrokerage,
                 ),
                 SettingsTile(
                   icon: Icons.upload_file_rounded,

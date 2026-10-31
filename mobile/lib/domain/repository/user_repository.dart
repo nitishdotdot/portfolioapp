@@ -1,5 +1,6 @@
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
+import 'package:portfolioapp/data/models/brokerage_model.dart';
 import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/data/models/sell_scrip_history_model.dart';
 import 'package:portfolioapp/data/models/user_model.dart';
@@ -27,4 +28,5 @@ abstract class UserRepository {
   Future<List<SellScripHistoryModel>> sellScripHistory();
   Future<List<FaqModel>> faq();
   Future<AboutUserModel> aboutuser();
+  Future<BrokerageModel> brokerage();
 }
