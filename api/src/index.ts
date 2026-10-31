@@ -641,6 +641,27 @@ app.get("/brokerage", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
+app.get("/aboutApp", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+
+    try {
+      const response = await prisma.aboutApp.findUnique({ where: { id: 1 } });
+      res.send(response);
+    } catch (e) {
+      console.log(e);
+      res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
 app.get("/aboutUser", async (req, res) => {
   try {
     const header = req.headers["authorization"];

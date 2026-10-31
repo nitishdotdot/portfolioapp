@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:portfolioapp/presentation/pages/about.dart';
 import 'package:portfolioapp/presentation/pages/brokerage.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
@@ -31,6 +32,10 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Every row routes here for now. Replace per row later.
   void _openFaq() {
     Navigator.push(context, MaterialPageRoute(builder: (_) => Faq()));
+  }
+
+  void _openaAbout() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => About()));
   }
 
   void _openBrokerage() {
@@ -304,12 +309,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   iconColor: AppColors.brandEnd,
                   onTap: _openFaq,
                 ),
-                SettingsTile(
-                  icon: Icons.support_agent_rounded,
-                  title: 'Contact support',
-                  iconColor: AppColors.brandEnd,
-                  onTap: _openFaq,
-                ),
+
                 SettingsTile(
                   icon: Icons.bug_report_outlined,
                   title: 'Report a problem',
@@ -333,7 +333,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.description_outlined,
                   title: 'Terms of service',
                   iconColor: Colors.blueGrey,
-                  onTap: _openFaq,
+                  onTap: _openaAbout,
                 ),
                 SettingsTile(
                   icon: Icons.privacy_tip_outlined,
@@ -346,6 +346,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'App version',
                   iconColor: Colors.blueGrey,
                   onTap: _opeVersion,
+                ),
+                SettingsTile(
+                  icon: Icons.book,
+                  title: 'About',
+                  iconColor: Colors.blueGrey,
+                  onTap: _openaAbout,
                 ),
               ],
             ),

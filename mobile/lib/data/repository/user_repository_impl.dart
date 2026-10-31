@@ -1,3 +1,4 @@
+import 'package:portfolioapp/data/models/about_model.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
 import 'package:portfolioapp/data/models/brokerage_model.dart';
@@ -74,5 +75,10 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<BrokerageModel> brokerage() async {
     return await userApi.brokerageApi();
+  }
+
+  @override
+  Future<AboutModel> aboutApp() async {
+    return await userApi.aboutAppApi();
   }
 }

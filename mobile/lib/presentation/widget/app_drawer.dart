@@ -17,6 +17,7 @@ class AppDrawer extends StatelessWidget {
     required this.onFaq,
     required this.onVersion,
     required this.onLogoutConfirmed,
+    required this.onAboutApp,
   });
 
   final String? name;
@@ -26,6 +27,7 @@ class AppDrawer extends StatelessWidget {
   final VoidCallback onVersion;
   final VoidCallback onHistory;
   final VoidCallback onFaq;
+  final VoidCallback onAboutApp;
   final VoidCallback onLogoutConfirmed;
 
   void _confirmLogout(BuildContext context) {
@@ -218,9 +220,10 @@ class AppDrawer extends StatelessWidget {
                   title: 'Faqs',
                   onTap: onFaq,
                 ),
-                const _DrawerTile(
+                _DrawerTile(
                   icon: Icons.phone_android_rounded,
                   title: 'About',
+                  onTap: onAboutApp,
                 ),
                 _DrawerTile(
                   icon: Icons.android_rounded,

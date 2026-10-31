@@ -12,6 +12,7 @@ import 'package:portfolioapp/main.dart';
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
+import 'package:portfolioapp/presentation/pages/about.dart';
 import 'package:portfolioapp/presentation/pages/faq.dart';
 import 'package:portfolioapp/presentation/pages/history.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
@@ -356,7 +357,10 @@ class _PortfolioappState extends State<Portfolioapp> {
           context,
           MaterialPageRoute(builder: (_) => History()),
         ),
-
+        onAboutApp: () => Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => About()),
+        ),
         onFaq: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => Faq()),

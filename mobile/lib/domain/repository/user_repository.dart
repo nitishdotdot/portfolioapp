@@ -1,3 +1,4 @@
+import 'package:portfolioapp/data/models/about_model.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
 import 'package:portfolioapp/data/models/brokerage_model.dart';
@@ -29,4 +30,5 @@ abstract class UserRepository {
   Future<List<FaqModel>> faq();
   Future<AboutUserModel> aboutuser();
   Future<BrokerageModel> brokerage();
+  Future<AboutModel> aboutApp();
 }

@@ -1,3 +1,4 @@
+import 'package:portfolioapp/data/models/about_model.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
 import 'package:portfolioapp/data/models/brokerage_model.dart';
@@ -24,4 +25,5 @@ abstract class UserApi {
   Future<List<FaqModel>> faqApi();
   Future<AboutUserModel> aboutUserApi();
   Future<BrokerageModel> brokerageApi();
+  Future<AboutModel> aboutAppApi();
 }

@@ -72,3 +72,15 @@ model tax{
     question String
     answer String
   }
+  model aboutApp{
+    id Int @id @default(autoincrement())    
+    appName String
+    version String
+    tagline String
+  description String
+  developerName String
+  supportEmail String
+    website String
+  disclaimer String
+  features  Json
+  }
