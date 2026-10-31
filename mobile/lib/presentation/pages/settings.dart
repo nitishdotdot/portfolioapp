@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
 import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
+import 'package:portfolioapp/presentation/pages/version.dart';
 import 'faq.dart'; // must contain the `Faq` class
 import 'package:portfolioapp/presentation/widget/widgets.dart';
 import 'package:portfolioapp/presentation/widget/settings_widgets.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
+import 'package:portfolioapp/presentation/pages/profile.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, this.userName, this.email});
+  const SettingsPage({super.key, required this.userName, required this.email});
 
   final String? userName;
   final String? email;
@@ -28,6 +30,14 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Every row routes here for now. Replace per row later.
   void _openFaq() {
     Navigator.push(context, MaterialPageRoute(builder: (_) => Faq()));
+  }
+
+  void _opeProfile() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+  }
+
+  void _opeVersion() {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => Version()));
   }
 
   Future<void> _confirmLogout() async {
@@ -87,7 +97,6 @@ class _SettingsPageState extends State<SettingsPage> {
             SettingsProfileHeader(
               name: widget.userName ?? 'Investor',
               email: widget.email ?? 'Tap to edit your profile',
-              onTap: _openFaq,
             ),
             const SizedBox(height: 24),
 
@@ -98,7 +107,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.person_outline_rounded,
                   title: 'Edit profile',
                   subtitle: 'Name, email and phone number',
-                  onTap: _openFaq,
+                  onTap: _opeProfile,
                 ),
                 SettingsTile(
                   icon: Icons.lock_outline_rounded,
@@ -331,8 +340,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.info_outline_rounded,
                   title: 'App version',
                   iconColor: Colors.blueGrey,
-                  trailingText: '1.0.0',
-                  onTap: _openFaq,
+                  onTap: _opeVersion,
                 ),
               ],
             ),

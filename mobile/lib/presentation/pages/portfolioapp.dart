@@ -348,7 +348,9 @@ class _PortfolioappState extends State<Portfolioapp> {
         ),
         onSettings: () => Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => SettingsPage()),
+          MaterialPageRoute(
+            builder: (_) => SettingsPage(userName: name, email: email),
+          ),
         ),
         onHistory: () => Navigator.pushReplacement(
           context,

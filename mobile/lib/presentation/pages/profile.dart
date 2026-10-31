@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
+import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'package:portfolioapp/presentation/widget/widgets.dart'; // AppColors, pagePadding
 import 'package:portfolioapp/presentation/widget/faq_widgets.dart'; // FaqStateMessage
 import 'package:portfolioapp/presentation/widget/profile_widgets.dart';
@@ -233,7 +234,20 @@ class _ProfilePageState extends State<ProfilePage> {
     // 1) still loading
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Profile'), centerTitle: true),
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => Portfolioapp()),
+              );
+            },
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+          title: Text('Profile', style: TextStyle(fontWeight: FontWeight.w700)),
+          centerTitle: true,
+          // Default back arrow is used: it pops back to the previous page.
+        ),
         body: const Center(
           child: CircularProgressIndicator(color: AppColors.brandStart),
         ),
@@ -243,7 +257,20 @@ class _ProfilePageState extends State<ProfilePage> {
     // 2) failed to load
     if (_error != null || _saved == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Profile'), centerTitle: true),
+        appBar: AppBar(
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => Portfolioapp()),
+              );
+            },
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+          title: Text('Profile', style: TextStyle(fontWeight: FontWeight.w700)),
+          centerTitle: true,
+          // Default back arrow is used: it pops back to the previous page.
+        ),
         body: FaqStateMessage(
           icon: Icons.wifi_off_rounded,
           color: AppColors.loss,
@@ -262,6 +289,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => Portfolioapp()),
+            );
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
         title: const Text(
           'Profile',
           style: TextStyle(fontWeight: FontWeight.w700),

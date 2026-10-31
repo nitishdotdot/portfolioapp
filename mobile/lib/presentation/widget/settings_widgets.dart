@@ -11,12 +11,10 @@ class SettingsProfileHeader extends StatelessWidget {
     super.key,
     required this.name,
     required this.email,
-    this.onTap,
   });
 
   final String name;
   final String email;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +36,7 @@ class SettingsProfileHeader extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(28),
-          onTap: onTap,
+
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Row(
@@ -88,7 +86,6 @@ class SettingsProfileHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: Colors.white70),
               ],
             ),
           ),
