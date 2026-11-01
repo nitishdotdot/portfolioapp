@@ -9,7 +9,7 @@ import 'package:portfolioapp/data/models/buy_scrip_history_model.dart';
 
 abstract class UserRepository {
   Future<UserModel> userData();
-  Future<bool> deleteuser();
+  Future<bool> deleteuser(String suggestion, String datetime);
   Future<bool> addUser(
     String name,
     int kitta,

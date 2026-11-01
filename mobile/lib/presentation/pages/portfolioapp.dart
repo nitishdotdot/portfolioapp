@@ -252,7 +252,12 @@ class _PortfolioappState extends State<Portfolioapp> {
     );
   }
 
-  void getUerData() async {
+  Future<void> getUerData() async {
+    setState(() {
+      currentValue = 0;
+      invested = 0;
+      profit = 0;
+    });
     final userrepo = s1<UserRepository>();
     UserModel userModel = await userrepo.userData();
     setState(() {
@@ -265,15 +270,6 @@ class _PortfolioappState extends State<Portfolioapp> {
         profit += scrips[i].currentProfit;
       }
     });
-  }
-
-  void refresh() {
-    setState(() {
-      currentValue = 0;
-      invested = 0;
-      profit = 0;
-    });
-    getUerData();
   }
 
   // Existing long-press delete flow, moved into a method (logic unchanged).
@@ -294,7 +290,7 @@ class _PortfolioappState extends State<Portfolioapp> {
                       final deleted = await deletescrip(scripName);
                       if (context.mounted) {
                         if (deleted) {
-                          refresh();
+                          getUerData();
                           Navigator.pop(context);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -331,14 +327,6 @@ class _PortfolioappState extends State<Portfolioapp> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {
-              refresh();
-            },
-            icon: const Icon(Icons.refresh_rounded),
-          ),
-        ],
       ),
       drawer: AppDrawer(
         name: name,
@@ -382,81 +370,88 @@ class _PortfolioappState extends State<Portfolioapp> {
         ),
       ),
 
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          // Keeps the dashboard readable on tablets / wide windows.
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: ListView.builder(
-            padding: EdgeInsets.fromLTRB(pad, 4, pad, 24),
-            physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: scrips.length + 3,
-            itemBuilder: (BuildContext context, int i) {
-              if (i == 0) {
-                // Portfolio totals are not exposed by the existing code, so
-                // they are left null (shown as an em dash). Pass your existing
-                // already-formatted values here when you have them.
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: PortfolioSummaryCard(
-                    userName: name,
-                    holdingsCount: scrips.length,
-                    currentValueText: currentValue.toStringAsFixed(3),
-                    investedText: invested.toStringAsFixed(3),
-                    profitText: profit.toStringAsFixed(3),
-                    profitValue: profit.toStringAsFixed(3),
-                    profitpercent: (profit * 100 / invested).toStringAsFixed(3),
-                  ),
-                );
-              }
-              if (i == 1) {
-                return const Padding(
-                  padding: EdgeInsets.only(bottom: 20),
-                  child: PortfolioGraph(),
-                );
-              }
-              if (i == 2) {
+      body: RefreshIndicator(
+        onRefresh: () => getUerData(),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            // Keeps the dashboard readable on tablets / wide windows.
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: ListView.builder(
+              padding: EdgeInsets.fromLTRB(pad, 4, pad, 24),
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: scrips.length + 3,
+              itemBuilder: (BuildContext context, int i) {
+                if (i == 0) {
+                  // Portfolio totals are not exposed by the existing code, so
+                  // they are left null (shown as an em dash). Pass your existing
+                  // already-formatted values here when you have them.
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: PortfolioSummaryCard(
+                      userName: name,
+                      holdingsCount: scrips.length,
+                      currentValueText: currentValue.toStringAsFixed(3),
+                      investedText: invested.toStringAsFixed(3),
+                      profitText: profit.toStringAsFixed(3),
+                      profitValue: profit.toStringAsFixed(3),
+                      profitpercent: (profit * 100 / invested).toStringAsFixed(
+                        3,
+                      ),
+                    ),
+                  );
+                }
+                if (i == 1) {
+                  return const Padding(
+                    padding: EdgeInsets.only(bottom: 20),
+                    child: PortfolioGraph(),
+                  );
+                }
+                if (i == 2) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SectionHeader(
+                      title: 'My Holdings',
+                      trailing: Text(
+                        'Swipe → Buy   ← Sell',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withAlpha(130),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                final scrip = scrips[i - 3];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: SectionHeader(
-                    title: 'My Holdings',
-                    trailing: Text(
-                      'Swipe → Buy   ← Sell',
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withAlpha(130),
-                      ),
+                  child: SwipeableScripCard(
+                    // Existing handlers, reused as-is. Swiping only opens the
+                    // sheet; nothing is submitted until the user confirms there.
+                    onBuy: buymodelButtomSheet,
+                    onSell: sellmodelButtomSheet,
+                    onLongPress: () => confirmDeleteScrip(scrip.name),
+                    child: ScripInfoCard(
+                      name: scrip.name,
+                      companyName: scrip.companyName,
+                      kitta: scrip.kitta,
+                      wacc: scrip.wacc,
+                      total: scrip.total.toStringAsFixed(3),
+                      ltp: scrip.ltp,
+                      currentProfit: scrip.currentProfit.toStringAsFixed(3),
+                      percentprofit:
+                          (scrip.currentProfit.toDouble() *
+                                  100 /
+                                  scrip.invested)
+                              .toStringAsFixed(3),
                     ),
                   ),
                 );
-              }
-
-              final scrip = scrips[i - 3];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SwipeableScripCard(
-                  // Existing handlers, reused as-is. Swiping only opens the
-                  // sheet; nothing is submitted until the user confirms there.
-                  onBuy: buymodelButtomSheet,
-                  onSell: sellmodelButtomSheet,
-                  onLongPress: () => confirmDeleteScrip(scrip.name),
-                  child: ScripInfoCard(
-                    name: scrip.name,
-                    companyName: scrip.companyName,
-                    kitta: scrip.kitta,
-                    wacc: scrip.wacc,
-                    total: scrip.total.toStringAsFixed(3),
-                    ltp: scrip.ltp,
-                    currentProfit: scrip.currentProfit.toStringAsFixed(3),
-                    percentprofit:
-                        (scrip.currentProfit.toDouble() * 100 / scrip.invested)
-                            .toStringAsFixed(3),
-                  ),
-                ),
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

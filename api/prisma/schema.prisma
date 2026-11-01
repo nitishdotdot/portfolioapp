@@ -84,3 +84,8 @@ model tax{
   disclaimer String
   features  Json
   }
+  model appSuggestions{
+    id Int @id @default(autoincrement())
+    suggestion String
+    datetime DateTime
+  }

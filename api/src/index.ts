@@ -435,7 +435,7 @@ app.post("/sellscrip", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
-app.delete("/deleteuser", async (req, res) => {
+app.post("/deleteuser", async (req, res) => {
   try {
     const jwtToken = req.headers["authorization"]?.split(" ")[1];
     if (jwtToken == null) {
@@ -444,16 +444,35 @@ app.delete("/deleteuser", async (req, res) => {
     }
     const decoded = jwt.verify(jwtToken, process.env.JWT_SECRET!.toString());
     const id = Number((decoded as any).id);
-    try {
-      await prisma.buyscrip.deleteMany({ where: { userid: id } });
-      await prisma.buyscriphistory.deleteMany({ where: { userid: id } });
-      await prisma.user.delete({
-        where: { id: id },
-      });
-      res.send("ok");
-    } catch (e) {
-      console.log(e);
-      res.status(404).send("server error");
+    const data = req.body;
+    if (data.suggestion && data.datetime)
+      try {
+        await prisma.appSuggestions.create({
+          data: { suggestion: data.suggestion, datetime: data.datetime },
+        });
+        if ((await prisma.buyscrip.count({ where: { userid: id } })) > 0) {
+          await prisma.buyscrip.deleteMany({ where: { userid: id } });
+        }
+        if (
+          (await prisma.buyscriphistory.count({ where: { userid: id } })) > 0
+        ) {
+          await prisma.buyscriphistory.deleteMany({ where: { userid: id } });
+        }
+        if (
+          (await prisma.sellscriphistory.count({ where: { userid: id } })) > 0
+        ) {
+          await prisma.sellscriphistory.deleteMany({ where: { userid: id } });
+        }
+        await prisma.user.delete({
+          where: { id: id },
+        });
+        res.send("ok");
+      } catch (e) {
+        console.log(e);
+        res.status(404).send("server error");
+      }
+    else {
+      res.status(400).send("wrong-body");
     }
   } catch (e) {}
 });
@@ -615,6 +634,34 @@ app.get("/faq", async (req, res) => {
     } catch (e) {
       console.log(e);
       res.status(404).send("server error");
+    }
+  } catch (e) {
+    res.status(400).send("invalid token");
+  }
+});
+app.post("/appSuggestions", async (req, res) => {
+  try {
+    const header = req.headers["authorization"];
+    if (header == null) {
+      res.status(404).send("require token");
+      return;
+    }
+    const token = header.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
+    const data = req.body;
+    if (data.suggestion && data.datetime) {
+      try {
+        const response = await prisma.appSuggestions.create({
+          data: { suggestion: data.suggestion, datetime: data.datetime },
+        });
+
+        res.send(response);
+      } catch (e) {
+        console.log(e);
+        res.status(404).send("server error");
+      }
+    } else {
+      res.status(400).send("wrong body");
     }
   } catch (e) {
     res.status(400).send("invalid token");

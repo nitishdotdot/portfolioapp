@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:portfolioapp/presentation/pages/about.dart';
 import 'package:portfolioapp/presentation/pages/brokerage.dart';
+import 'package:portfolioapp/presentation/pages/delete_account.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
 import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
@@ -32,6 +33,13 @@ class _SettingsPageState extends State<SettingsPage> {
   /// Every row routes here for now. Replace per row later.
   void _openFaq() {
     Navigator.push(context, MaterialPageRoute(builder: (_) => Faq()));
+  }
+
+  void _openDeleteAccount() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => DeleteAccountPage()),
+    );
   }
 
   void _openaAbout() {
@@ -241,59 +249,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   title: 'Delete Account',
                   subtitle: 'Delete your account permanently',
                   iconColor: AppColors.loss,
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('Do you want to delete your account'),
-
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      final userrepo = s1<UserRepository>();
-                                      final isDeleted = await userrepo
-                                          .deleteuser();
-                                      if (isDeleted) {
-                                        if (context.mounted) {
-                                          Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => Loginpage(),
-                                            ),
-                                          );
-                                        }
-                                      } else {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text('some error occured'),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    child: Text('yes'),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    child: Text('no'),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
+                  onTap: _openDeleteAccount,
                 ),
               ],
             ),

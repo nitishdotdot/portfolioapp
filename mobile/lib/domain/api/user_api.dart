@@ -9,7 +9,7 @@ import 'package:portfolioapp/data/models/buy_scrip_history_model.dart';
 
 abstract class UserApi {
   Future<UserModel> userDataApi();
-  Future<bool> deleteaUserApi();
+  Future<bool> deleteaUserApi(String suggestion, String datetime);
   Future<bool> addUserApi(String name, int kitta, int buyprice, String buytime);
 
   Future<bool> sellUserApi(

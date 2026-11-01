@@ -29,12 +29,13 @@ class UserApiImpl extends UserApi {
   }
 
   @override
-  Future<bool> deleteaUserApi() async {
+  Future<bool> deleteaUserApi(String suggestion, String datetime) async {
     final localstorage = s1<Localstorage>();
     String? token = await localstorage.getToken();
     try {
-      final response = await dio.delete(
+      final response = await dio.post(
         '${dotenv.get('BACKEND_URL')}/deleteuser',
+        data: {"suggestion": suggestion, "datetime": datetime},
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
       if (response.statusCode == 200) {
