@@ -436,12 +436,13 @@ class _PortfolioappState extends State<Portfolioapp> {
                     onLongPress: () => confirmDeleteScrip(scrip.name),
                     child: ScripInfoCard(
                       name: scrip.name,
+                      holding: scrip.holding,
                       companyName: scrip.companyName,
                       kitta: scrip.kitta,
                       wacc: scrip.wacc,
-                      total: scrip.total.toStringAsFixed(3),
+                      total: scrip.total.toStringAsFixed(2),
                       ltp: scrip.ltp,
-                      currentProfit: scrip.currentProfit.toStringAsFixed(3),
+                      currentProfit: scrip.currentProfit.toStringAsFixed(2),
                       percentprofit:
                           (scrip.currentProfit.toDouble() *
                                   100 /

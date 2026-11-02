@@ -424,6 +424,7 @@ class ScripInfoCard extends StatelessWidget {
     required this.ltp,
     required this.currentProfit,
     required this.percentprofit,
+    required this.holding,
   });
 
   final String name;
@@ -434,6 +435,7 @@ class ScripInfoCard extends StatelessWidget {
   final Object? ltp;
   final Object? currentProfit;
   final String percentprofit;
+  final int holding;
 
   @override
   Widget build(BuildContext context) {
@@ -557,6 +559,9 @@ class ScripInfoCard extends StatelessWidget {
               ),
               Expanded(
                 child: InfoTile(label: 'Total', value: '$total'),
+              ),
+              Expanded(
+                child: InfoTile(label: 'Holding', value: '$holding'),
               ),
             ],
           ),

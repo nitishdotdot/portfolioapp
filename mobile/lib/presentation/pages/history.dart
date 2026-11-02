@@ -144,9 +144,11 @@ class _HistoryState extends State<History> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: BuyHistoryCard(
                     name: item.name,
+                    total: item.total,
                     kitta: item.kitta.toString(),
                     price: item.buyprice.toString(),
                     date: item.buydatetime.toString().split('T')[0],
+                    holding: item.holding,
                   ),
                 );
               },
@@ -177,9 +179,10 @@ class _HistoryState extends State<History> {
                     kitta: item.kitta.toString(),
                     price: item.sellpice.toString(),
                     date: item.selldatetime.toString().split('T')[0],
-                    profit: item.profit.toString(),
+                    profit: item.profit.toStringAsFixed(2),
                     total: item.total.toString(),
                     profitPercent: item.profitPercent,
+                    holding: item.holding,
                   ),
                 );
               },

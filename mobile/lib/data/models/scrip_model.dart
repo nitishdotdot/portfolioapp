@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 class ScripModel {
   String name;
   int kitta;
@@ -9,6 +7,7 @@ class ScripModel {
   String companyName;
   num ltp;
   num invested;
+  int holding;
   ScripModel(
     this.name,
     this.kitta,
@@ -18,6 +17,7 @@ class ScripModel {
     this.companyName,
     this.ltp,
     this.invested,
+    this.holding,
   );
   factory ScripModel.fromJson(Map<String, dynamic> json) {
     return ScripModel(
@@ -29,6 +29,7 @@ class ScripModel {
       json['companyName'],
       json['ltp'],
       json['invested'],
+      json['holding'],
     );
   }
 }

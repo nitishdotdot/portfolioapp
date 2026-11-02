@@ -303,6 +303,26 @@ app.post("/sellscrip", async (req, res) => {
                   data.kitta *
                   Number(brComm?.plus(sebComm).times(1 / 100));
               let profit = total - Number(buyscrip!.wacc) * data.kitta;
+              let day = 0;
+              const cgt = await prisma.tax.findFirst({ where: { id: 1 } });
+              const buyscriphistory = await prisma.buyscriphistory.findFirst({
+                where: {
+                  userid: Number((decoded as any).id),
+                  name: (data.name as string).toUpperCase(),
+                },
+              });
+
+              const dateDiff =
+                new Date(data.selldatetime).getTime() -
+                Number(buyscriphistory!.buydatetime);
+              day = Math.floor(dateDiff / (1000 * 60 * 60 * 24));
+              if (profit > 0) {
+                if (day > 365) {
+                  profit = profit - Number(cgt!.longTax.times(profit)) / 100;
+                } else {
+                  profit = profit - Number(cgt!.shortTax.times(profit)) / 100;
+                }
+              }
               const profitPercent =
                 (profit * 100) / (Number(buyscrip!.wacc) * data.kitta);
               await prisma.sellscriphistory.create({
@@ -316,6 +336,7 @@ app.post("/sellscrip", async (req, res) => {
                   total: total,
                   profit: profit,
                   profitPercent: profitPercent,
+                  holding: day,
                 },
               });
               const leftkitta = Number(buyscrip!.kitta) - data.kitta;
@@ -347,13 +368,30 @@ app.post("/sellscrip", async (req, res) => {
               data.kitta *
               Number(brComm?.plus(sebComm).times(1 / 100)) -
             dpCharge;
-          const profit = total - Number(buyscrip!.wacc) * data.kitta;
+          let profit = total - Number(buyscrip!.wacc) * data.kitta;
+          const cgt = await prisma.tax.findFirst({ where: { id: 1 } });
+          const buyscriphistory = await prisma.buyscriphistory.findFirst({
+            where: {
+              userid: Number((decoded as any).id),
+              name: (data.name as string).toUpperCase(),
+            },
+          });
+          const dateDiff =
+            new Date(data.selldatetime).getTime() -
+            new Date(buyscriphistory!.buydatetime).getTime();
+          const day = Math.floor(dateDiff / (1000 * 60 * 60 * 24));
+          if (profit > 0) {
+            if (day > 365) {
+              profit = profit - Number(cgt!.longTax.times(profit)) / 100;
+            } else {
+              profit = profit - Number(cgt!.shortTax.times(profit)) / 100;
+            }
+          }
           const profitPercent =
             (profit * 100) / (Number(buyscrip!.wacc) * data.kitta);
           await prisma.sellscriphistory.create({
             data: {
               name: scripName,
-              userid: Number((decoded as any).id),
               sellprice: data.sellprice,
               kitta: data.kitta,
               selldatetime: data.selldatetime,
@@ -361,6 +399,12 @@ app.post("/sellscrip", async (req, res) => {
               total: total,
               profit: profit,
               profitPercent: profitPercent,
+              holding: day,
+              relation: {
+                connect: {
+                  id: Number((decoded as any).id),
+                },
+              },
             },
           });
           const leftkitta = Number(buyscrip!.kitta) - data.kitta;
@@ -393,7 +437,26 @@ app.post("/sellscrip", async (req, res) => {
             Number(brComm?.plus(sebComm).times(1 / 100)) -
           dpCharge;
         const wacc = total / data.kitta;
-        const profit = total - Number(buyscrip!.wacc) * data.kitta;
+        let profit = total - Number(buyscrip!.wacc) * data.kitta;
+        let day = 0;
+        if (profit > 0) {
+          const tax = await prisma.tax.findFirst({ where: { id: 1 } });
+          const buyscriphistory = await prisma.buyscriphistory.findFirst({
+            where: {
+              userid: Number((decoded as any).id),
+              name: (data.name as string).toUpperCase(),
+            },
+          });
+          const dateDiff =
+            new Date(data.selldatetime).getTime() -
+            Number(buyscriphistory!.buydatetime);
+          day = Math.floor(dateDiff / (1000 * 60 * 60 * 24));
+          if (day > 365) {
+            profit = profit - Number(tax?.longTax.times(profit)) / 100;
+          } else {
+            profit = profit - Number(tax?.shortTax.times(profit)) / 100;
+          }
+        }
         const name = (data.name as string).trim().toUpperCase();
         const profitPercent =
           (profit * 100) / (Number(buyscrip!.wacc) * data.kitta);
@@ -408,6 +471,7 @@ app.post("/sellscrip", async (req, res) => {
             total: total,
             profit: profit,
             profitPercent: profitPercent,
+            holding: day,
           },
         });
         const leftkitta = Number(buyscrip!.kitta) - data.kitta;
@@ -503,6 +567,18 @@ app.get("/user", async (req, res) => {
           },
         },
       });
+      let holding = 0;
+      if (response!.buyscrips != null) {
+        const buyscriphistory = await prisma.buyscriphistory.findFirst({
+          where: {
+            userid: Number((decoded as any).id),
+            name: response!.buyscrips[0].name,
+          },
+        });
+
+        const dateDiff = Date.now() - Number(buyscriphistory!.buydatetime);
+        holding = Math.floor(dateDiff / (3600000 * 24));
+      }
       const response1 = {
         ...response,
         buyscrips: await Promise.all(
@@ -527,6 +603,7 @@ app.get("/user", async (req, res) => {
               currentProfit,
               companyName,
               invested,
+              holding,
             };
           }),
         ),
@@ -555,9 +632,20 @@ app.get("/buyscriphistory", async (req, res) => {
     try {
       const response = await prisma.buyscriphistory.findMany({
         where: { userid: Number((decoded as any).id) },
-        select: { name: true, kitta: true, buydatetime: true, buyprice: true },
+        select: {
+          name: true,
+          kitta: true,
+          buydatetime: true,
+          buyprice: true,
+          total: true,
+        },
       });
-      res.send(response);
+      const response1 = response.map((i) => {
+        const dateDiff = Date.now() - Number(i.buydatetime);
+        const holding = Math.floor(dateDiff / (1000 * 60 * 60 * 24));
+        return { ...i, holding: holding };
+      });
+      res.send(response1);
     } catch (e) {
       console.log(e);
       res.status(404).send("server error");

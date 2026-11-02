@@ -53,6 +53,7 @@ model sellscriphistory {
   sellprice Decimal @db.Decimal(10,3) 
   kitta    Int
   selldatetime  DateTime 
+  holding Int
   wacc Decimal @db.Decimal(10,3)
   total Decimal @db.Decimal(10,3)
   profit Decimal @db.Decimal(10,3) 

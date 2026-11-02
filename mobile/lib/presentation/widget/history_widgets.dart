@@ -182,12 +182,16 @@ class BuyHistoryCard extends StatelessWidget {
     required this.kitta,
     required this.price,
     required this.date,
+    required this.total,
+    required this.holding,
   });
 
   final String name;
+  final String total;
   final Object? kitta;
   final Object? price;
   final String date;
+  final int holding;
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +257,12 @@ class BuyHistoryCard extends StatelessWidget {
               Expanded(
                 child: InfoTile(label: 'Buy price', value: '$price'),
               ),
+              Expanded(
+                child: InfoTile(label: 'Total', value: '$total'),
+              ),
+              Expanded(
+                child: InfoTile(label: 'Holding', value: '$holding'),
+              ),
             ],
           ),
         ],
@@ -272,6 +282,7 @@ class SellHistoryCard extends StatelessWidget {
     required this.profit,
     required this.total,
     required this.profitPercent,
+    required this.holding,
   });
 
   final String name;
@@ -281,6 +292,7 @@ class SellHistoryCard extends StatelessWidget {
   final String? profit;
   final String? total;
   final double profitPercent;
+  final int holding;
 
   @override
   Widget build(BuildContext context) {
@@ -404,6 +416,9 @@ class SellHistoryCard extends StatelessWidget {
               ),
               Expanded(
                 child: InfoTile(label: 'Total', value: '$total'),
+              ),
+              Expanded(
+                child: InfoTile(label: 'Holdings', value: '$holding'),
               ),
             ],
           ),

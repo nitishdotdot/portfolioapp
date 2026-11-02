@@ -6,6 +6,7 @@ class SellScripHistoryModel {
   double profit;
   double total;
   double profitPercent;
+  int holding;
   SellScripHistoryModel(
     this.name,
     this.kitta,
@@ -14,6 +15,7 @@ class SellScripHistoryModel {
     this.profit,
     this.total,
     this.profitPercent,
+    this.holding,
   );
   factory SellScripHistoryModel.fromJson(Map<String, dynamic> json) {
     return SellScripHistoryModel(
@@ -24,6 +26,7 @@ class SellScripHistoryModel {
       double.parse(json['profit'].toString()),
       double.parse(json['total'].toString()),
       double.parse(json['profitPercent']),
+      json['holding'],
     );
   }
 }
