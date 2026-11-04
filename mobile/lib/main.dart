@@ -4,6 +4,7 @@ import 'package:portfolioapp/core/di/injection_container.dart' as d;
 import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:portfolioapp/presentation/pages/portfolio_page.dart';
 
 void main() async {
   d.init();

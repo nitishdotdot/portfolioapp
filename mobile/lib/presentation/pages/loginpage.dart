@@ -10,7 +10,7 @@ import 'package:portfolioapp/presentation/bloc/login_bloc.dart';
 import 'package:portfolioapp/presentation/bloc/login_event.dart';
 import 'package:portfolioapp/presentation/bloc/login_state.dart';
 import 'package:portfolioapp/presentation/pages/adminpage.dart';
-import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
+import 'package:portfolioapp/presentation/pages/homepage.dart';
 import 'package:portfolioapp/presentation/pages/signup.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -33,17 +33,14 @@ class _LoginpageState extends State<Loginpage> {
   // ---------------------------------------------------------------------
   Future<void> _signIn(BuildContext context) async {
     AuthRepository authRepository = s1<AuthRepository>();
-    final isValidated = await authRepository.signIn(
-      email.text,
-      password.text,
-    );
+    final isValidated = await authRepository.signIn(email.text, password.text);
 
     if (!isValidated) {
       // Wrong credentials: no valid token exists, so do NOT decode it.
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('wrong credentials')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('wrong credentials')));
       }
       return;
     }
@@ -61,7 +58,7 @@ class _LoginpageState extends State<Loginpage> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => Portfolioapp()),
+          MaterialPageRoute(builder: (_) => Homepage()),
         );
       }
     }
@@ -78,9 +75,9 @@ class _LoginpageState extends State<Loginpage> {
     if (response != true) {
       // Sign-in failed or was cancelled: no valid token, so do NOT decode it.
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('error in google sign in')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('error in google sign in')));
       }
       return;
     }
@@ -90,13 +87,13 @@ class _LoginpageState extends State<Loginpage> {
     String role = JwtDecoder.decode(token.toString())['role'];
     if (context.mounted) {
       if (role == 'user') {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => Portfolioapp()),
-        );
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (_) => Homepage()));
       } else {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => AdminPage()),
-        );
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (_) => AdminPage()));
       }
     }
   }
@@ -134,7 +131,7 @@ class _LoginpageState extends State<Loginpage> {
           if (state is Loggedin) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => Portfolioapp()),
+              MaterialPageRoute(builder: (_) => Homepage()),
             );
           } else if (state is Logging) {
             showDialog(
@@ -327,15 +324,16 @@ class _LoginpageState extends State<Loginpage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
                                   ),
-                                  side: BorderSide(
-                                    color: cs.outlineVariant,
-                                  ),
+                                  side: BorderSide(color: cs.outlineVariant),
                                 ),
                                 onPressed: () => _googleSignIn(context),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Image.asset('assets/google.png', height: 22),
+                                    Image.asset(
+                                      'assets/google.png',
+                                      height: 22,
+                                    ),
                                     const SizedBox(width: 10),
                                     Flexible(
                                       child: Text(

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:portfolioapp/presentation/pages/about.dart';
 import 'package:portfolioapp/presentation/pages/brokerage.dart';
 import 'package:portfolioapp/presentation/pages/delete_account.dart';
+import 'package:portfolioapp/presentation/pages/homepage.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
-import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'package:portfolioapp/presentation/pages/version.dart';
 import 'faq.dart'; // must contain the `Faq` class
 import 'package:portfolioapp/presentation/widget/widgets.dart';
@@ -97,7 +97,7 @@ class _SettingsPageState extends State<SettingsPage> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => Portfolioapp()),
+              MaterialPageRoute(builder: (_) => Homepage()),
             );
           },
           icon: const Icon(Icons.arrow_back_rounded),

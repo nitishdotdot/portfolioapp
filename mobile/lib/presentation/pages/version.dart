@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
+import 'package:portfolioapp/presentation/pages/homepage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class Version extends StatefulWidget {
@@ -33,7 +33,7 @@ class _VersionState extends State<Version> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => Portfolioapp()),
+              MaterialPageRoute(builder: (_) => Homepage()),
             );
           },
           icon: const Icon(Icons.arrow_back_rounded),

@@ -3,7 +3,6 @@ import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/repository/auth_repository_impl.dart';
 import 'package:portfolioapp/domain/repository/auth_repository.dart';
 import 'package:portfolioapp/presentation/pages/loginpage.dart';
-import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
 import 'package:portfolioapp/presentation/widget/widgets.dart';
 
 class Signup extends StatefulWidget {
@@ -39,9 +38,9 @@ class _SignupState extends State<Signup> {
           MaterialPageRoute(builder: (_) => Loginpage()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('error in signup')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('error in signup')));
       }
     }
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/models/faq_model.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
-import 'package:portfolioapp/presentation/pages/portfolioapp.dart';
+import 'package:portfolioapp/presentation/pages/homepage.dart';
 import 'package:portfolioapp/presentation/widget/faq_widgets.dart';
 import 'package:portfolioapp/presentation/widget/widgets.dart';
 
@@ -118,7 +118,7 @@ class _FaqState extends State<Faq> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => Portfolioapp()),
+              MaterialPageRoute(builder: (_) => Homepage()),
             );
           },
           icon: const Icon(Icons.arrow_back_rounded),

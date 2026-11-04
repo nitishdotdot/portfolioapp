@@ -29,14 +29,14 @@ import 'package:portfolioapp/presentation/widget/widgets.dart';
 import 'package:portfolioapp/presentation/widget/app_drawer.dart';
 import 'package:portfolioapp/presentation/widget/trade_sheet.dart';
 
-class Portfolioapp extends StatefulWidget {
-  const Portfolioapp({super.key});
+class PortfolioPage extends StatefulWidget {
+  const PortfolioPage({super.key});
 
   @override
-  State<Portfolioapp> createState() => _PortfolioappState();
+  State<PortfolioPage> createState() => PortfolioPageState();
 }
 
-class _PortfolioappState extends State<Portfolioapp> {
+class PortfolioPageState extends State<PortfolioPage> {
   final userApi = s1<UserApi>();
 
   TextEditingController name1 = TextEditingController();
@@ -57,16 +57,9 @@ class _PortfolioappState extends State<Portfolioapp> {
   // UI-only: selected tab in the floating navigation bar.
   int currentIndex = 0;
 
-  static const List<FloatingNavItem> _navItems = [
-    FloatingNavItem(icon: Icons.pie_chart_rounded, label: 'Portfolio'),
-    FloatingNavItem(icon: Icons.add_circle_rounded, label: 'Buy'),
-    FloatingNavItem(icon: Icons.person_rounded, label: 'Profile'),
-  ];
-
   @override
   void initState() {
     super.initState();
-    getUerData();
   }
 
   Future<bool> deletescrip(String scripname) async {
@@ -165,6 +158,50 @@ class _PortfolioappState extends State<Portfolioapp> {
     );
   }
 
+  AppDrawer portfoliopagedrawer() {
+    return AppDrawer(
+      name: name,
+      email: email,
+      onProfile: () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => ProfilePage()),
+      ),
+      onSettings: () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => SettingsPage(userName: name, email: email),
+        ),
+      ),
+      onHistory: () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => History()),
+      ),
+      onAboutApp: () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => About()),
+      ),
+      onFaq: () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => Faq()),
+      ),
+      onLogoutConfirmed: () {
+        final authrepo = s1<AuthRepository>();
+        authrepo.googleSignOut();
+        if (context.mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => Loginpage()),
+          );
+        }
+      },
+
+      onVersion: () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => Version()),
+      ),
+    );
+  }
+
   void buymodelButtomSheet() {
     showModalBottomSheet(
       enableDrag: true,
@@ -252,26 +289,6 @@ class _PortfolioappState extends State<Portfolioapp> {
     );
   }
 
-  Future<void> getUerData() async {
-    setState(() {
-      currentValue = 0;
-      invested = 0;
-      profit = 0;
-    });
-    final userrepo = s1<UserRepository>();
-    UserModel userModel = await userrepo.userData();
-    setState(() {
-      email = userModel.email;
-      name = userModel.name;
-      scrips = userModel.scrip;
-      for (int i = 0; i < scrips.length; i++) {
-        currentValue += scrips[i].total;
-        invested += scrips[i].invested;
-        profit += scrips[i].currentProfit;
-      }
-    });
-  }
-
   // Existing long-press delete flow, moved into a method (logic unchanged).
   void confirmDeleteScrip(String scripName) {
     showDialog(
@@ -322,156 +339,86 @@ class _PortfolioappState extends State<Portfolioapp> {
     final w = s.width;
     final pad = pagePadding(w);
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
-      drawer: AppDrawer(
-        name: name,
-        email: email,
-        onProfile: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (BuildContext context) => ProfilePage()),
-        ),
-        onSettings: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => SettingsPage(userName: name, email: email),
-          ),
-        ),
-        onHistory: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => History()),
-        ),
-        onAboutApp: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => About()),
-        ),
-        onFaq: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => Faq()),
-        ),
-        onLogoutConfirmed: () {
-          final authrepo = s1<AuthRepository>();
-          authrepo.googleSignOut();
-          if (context.mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => Loginpage()),
-            );
-          }
-        },
-
-        onVersion: () => Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => Version()),
-        ),
-      ),
-
-      body: RefreshIndicator(
-        onRefresh: () => getUerData(),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            // Keeps the dashboard readable on tablets / wide windows.
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: ListView.builder(
-              padding: EdgeInsets.fromLTRB(pad, 4, pad, 24),
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: scrips.length + 3,
-              itemBuilder: (BuildContext context, int i) {
-                if (i == 0) {
-                  // Portfolio totals are not exposed by the existing code, so
-                  // they are left null (shown as an em dash). Pass your existing
-                  // already-formatted values here when you have them.
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: PortfolioSummaryCard(
-                      userName: name,
-                      holdingsCount: scrips.length,
-                      currentValueText: currentValue.toStringAsFixed(3),
-                      investedText: invested.toStringAsFixed(3),
-                      profitText: profit.toStringAsFixed(3),
-                      profitValue: profit.toStringAsFixed(3),
-                      profitpercent: (profit * 100 / invested).toStringAsFixed(
-                        3,
-                      ),
-                    ),
-                  );
-                }
-                if (i == 1) {
-                  return const Padding(
-                    padding: EdgeInsets.only(bottom: 20),
-                    child: PortfolioGraph(),
-                  );
-                }
-                if (i == 2) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: SectionHeader(
-                      title: 'My Holdings',
-                      trailing: Text(
-                        'Swipe → Buy   ← Sell',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withAlpha(130),
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                final scrip = scrips[i - 3];
+    return RefreshIndicator(
+      onRefresh: () => getUerData(),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          // Keeps the dashboard readable on tablets / wide windows.
+          constraints: const BoxConstraints(maxWidth: 720),
+          child: ListView.builder(
+            padding: EdgeInsets.fromLTRB(pad, 4, pad, 24),
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: scrips.length + 3,
+            itemBuilder: (BuildContext context, int i) {
+              if (i == 0) {
+                // Portfolio totals are not exposed by the existing code, so
+                // they are left null (shown as an em dash). Pass your existing
+                // already-formatted values here when you have them.
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: PortfolioSummaryCard(
+                    userName: name,
+                    holdingsCount: scrips.length,
+                    currentValueText: currentValue.toStringAsFixed(3),
+                    investedText: invested.toStringAsFixed(3),
+                    profitText: profit.toStringAsFixed(3),
+                    profitValue: profit.toStringAsFixed(3),
+                    profitpercent: (profit * 100 / invested).toStringAsFixed(3),
+                  ),
+                );
+              }
+              if (i == 1) {
+                return const Padding(
+                  padding: EdgeInsets.only(bottom: 20),
+                  child: PortfolioGraph(),
+                );
+              }
+              if (i == 2) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: SwipeableScripCard(
-                    // Existing handlers, reused as-is. Swiping only opens the
-                    // sheet; nothing is submitted until the user confirms there.
-                    onBuy: buymodelButtomSheet,
-                    onSell: sellmodelButtomSheet,
-                    onLongPress: () => confirmDeleteScrip(scrip.name),
-                    child: ScripInfoCard(
-                      name: scrip.name,
-                      holding: scrip.holding,
-                      companyName: scrip.companyName,
-                      kitta: scrip.kitta,
-                      wacc: scrip.wacc,
-                      total: scrip.total.toStringAsFixed(2),
-                      ltp: scrip.ltp,
-                      currentProfit: scrip.currentProfit.toStringAsFixed(2),
-                      percentprofit:
-                          (scrip.currentProfit.toDouble() *
-                                  100 /
-                                  scrip.invested)
-                              .toStringAsFixed(3),
+                  child: SectionHeader(
+                    title: 'My Holdings',
+                    trailing: Text(
+                      'Swipe → Buy   ← Sell',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withAlpha(130),
+                      ),
                     ),
                   ),
                 );
-              },
-            ),
+              }
+
+              final scrip = scrips[i - 3];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SwipeableScripCard(
+                  // Existing handlers, reused as-is. Swiping only opens the
+                  // sheet; nothing is submitted until the user confirms there.
+                  onBuy: buymodelButtomSheet,
+                  onSell: sellmodelButtomSheet,
+                  onLongPress: () => confirmDeleteScrip(scrip.name),
+                  child: ScripInfoCard(
+                    name: scrip.name,
+                    holding: scrip.holding,
+                    companyName: scrip.companyName,
+                    kitta: scrip.kitta,
+                    wacc: scrip.wacc,
+                    total: scrip.total.toStringAsFixed(2),
+                    ltp: scrip.ltp,
+                    currentProfit: scrip.currentProfit.toStringAsFixed(2),
+                    percentprofit:
+                        (scrip.currentProfit.toDouble() * 100 / scrip.invested)
+                            .toStringAsFixed(3),
+                  ),
+                ),
+              );
+            },
           ),
         ),
-      ),
-      bottomNavigationBar: FloatingBottomNavBar(
-        items: _navItems,
-        selectedIndex: currentIndex,
-        onTap: (x) {
-          // Same behaviour as before: only the middle tab opens the buy sheet.
-          if (x == 1) {
-            buymodelButtomSheet();
-          } else if (x == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => ProfilePage()),
-            );
-          } else {
-            setState(() => currentIndex = x);
-          }
-        },
       ),
     );
   }
