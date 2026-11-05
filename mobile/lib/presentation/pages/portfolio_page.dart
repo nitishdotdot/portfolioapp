@@ -30,8 +30,25 @@ import 'package:portfolioapp/presentation/widget/app_drawer.dart';
 import 'package:portfolioapp/presentation/widget/trade_sheet.dart';
 
 class PortfolioPage extends StatefulWidget {
-  const PortfolioPage({super.key});
-
+  const PortfolioPage({
+    super.key,
+    required this.email,
+    required this.name,
+    required this.holdings,
+    required this.currentValue,
+    required this.invested,
+    required this.profit,
+    required this.scrips,
+    required this.getUserData,
+  });
+  final String? email;
+  final String? name;
+  final String? holdings;
+  final double currentValue;
+  final double profit;
+  final double invested;
+  final List<ScripModel> scrips;
+  final Future<void> Function() getUserData;
   @override
   State<PortfolioPage> createState() => PortfolioPageState();
 }
@@ -42,34 +59,17 @@ class PortfolioPageState extends State<PortfolioPage> {
   TextEditingController name1 = TextEditingController();
   TextEditingController kitta1 = TextEditingController();
   TextEditingController buyprice1 = TextEditingController();
-  String? token;
-  String? email;
-  int? l;
-  String? name;
-  DateTime? datetime;
-  String? date;
-  String? holdings;
-  double currentValue = 0;
-  double profit = 0;
-  double invested = 0;
-  List<ScripModel> scrips = [];
+  //String? token;
 
   // UI-only: selected tab in the floating navigation bar.
   int currentIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+  DateTime? datetime;
+  String? date;
 
   Future<bool> deletescrip(String scripname) async {
     final userapi = s1<UserRepository>();
     return await userapi.deletescrip(scripname);
   }
-
-  // ---------------------------------------------------------------------
-  // Existing buy / sell sheets: UNCHANGED
-  // ---------------------------------------------------------------------
 
   void sellmodelButtomSheet() {
     showModalBottomSheet(
@@ -127,7 +127,7 @@ class PortfolioPageState extends State<PortfolioPage> {
                     );
                     if (context.mounted) {
                       if (responce == true) {
-                        getUerData();
+                        await widget.getUserData();
                         Navigator.pop(context);
                       } else {
                         showDialog(
@@ -155,50 +155,6 @@ class PortfolioPageState extends State<PortfolioPage> {
           },
         );
       },
-    );
-  }
-
-  AppDrawer portfoliopagedrawer() {
-    return AppDrawer(
-      name: name,
-      email: email,
-      onProfile: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (BuildContext context) => ProfilePage()),
-      ),
-      onSettings: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => SettingsPage(userName: name, email: email),
-        ),
-      ),
-      onHistory: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => History()),
-      ),
-      onAboutApp: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => About()),
-      ),
-      onFaq: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => Faq()),
-      ),
-      onLogoutConfirmed: () {
-        final authrepo = s1<AuthRepository>();
-        authrepo.googleSignOut();
-        if (context.mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => Loginpage()),
-          );
-        }
-      },
-
-      onVersion: () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => Version()),
-      ),
     );
   }
 
@@ -258,7 +214,7 @@ class PortfolioPageState extends State<PortfolioPage> {
                     );
                     if (context.mounted) {
                       if (responce == true) {
-                        getUerData();
+                        await widget.getUserData();
                         Navigator.pop(context);
                       } else {
                         showDialog(
@@ -307,7 +263,7 @@ class PortfolioPageState extends State<PortfolioPage> {
                       final deleted = await deletescrip(scripName);
                       if (context.mounted) {
                         if (deleted) {
-                          getUerData();
+                          await widget.getUserData();
                           Navigator.pop(context);
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -340,31 +296,28 @@ class PortfolioPageState extends State<PortfolioPage> {
     final pad = pagePadding(w);
 
     return RefreshIndicator(
-      onRefresh: () => getUerData(),
+      onRefresh: widget.getUserData,
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          // Keeps the dashboard readable on tablets / wide windows.
           constraints: const BoxConstraints(maxWidth: 720),
           child: ListView.builder(
             padding: EdgeInsets.fromLTRB(pad, 4, pad, 24),
             physics: const AlwaysScrollableScrollPhysics(),
-            itemCount: scrips.length + 3,
+            itemCount: widget.scrips.length + 3,
             itemBuilder: (BuildContext context, int i) {
               if (i == 0) {
-                // Portfolio totals are not exposed by the existing code, so
-                // they are left null (shown as an em dash). Pass your existing
-                // already-formatted values here when you have them.
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: PortfolioSummaryCard(
-                    userName: name,
-                    holdingsCount: scrips.length,
-                    currentValueText: currentValue.toStringAsFixed(3),
-                    investedText: invested.toStringAsFixed(3),
-                    profitText: profit.toStringAsFixed(3),
-                    profitValue: profit.toStringAsFixed(3),
-                    profitpercent: (profit * 100 / invested).toStringAsFixed(3),
+                    userName: widget.name,
+                    holdingsCount: widget.scrips.length,
+                    currentValueText: widget.currentValue.toStringAsFixed(3),
+                    investedText: widget.invested.toStringAsFixed(3),
+                    profitText: widget.profit.toStringAsFixed(3),
+                    profitValue: widget.profit.toStringAsFixed(3),
+                    profitpercent: (widget.profit * 100 / widget.invested)
+                        .toStringAsFixed(3),
                   ),
                 );
               }
@@ -392,7 +345,7 @@ class PortfolioPageState extends State<PortfolioPage> {
                 );
               }
 
-              final scrip = scrips[i - 3];
+              final scrip = widget.scrips[i - 3];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: SwipeableScripCard(

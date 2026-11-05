@@ -125,7 +125,8 @@ class _AdminPageState extends State<AdminPage> {
                   onTap: () => Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (BuildContext context) => ProfilePage(),
+                      builder: (BuildContext context) =>
+                          ProfilePage(showScaffold: true),
                     ),
                   ),
                   leading: Icon(Icons.person),

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
@@ -57,9 +56,11 @@ class ProfilePage extends StatefulWidget {
     this.themeMode = ThemeMode.system,
     this.onThemeChanged,
     this.onSave,
+    required this.showScaffold,
   });
 
   final ThemeMode themeMode;
+  final bool showScaffold;
   final ValueChanged<ThemeMode>? onThemeChanged;
 
   /// Called when the user taps Save. Throw to show a failure message.
@@ -185,8 +186,6 @@ class ProfilePageState extends State<ProfilePage> {
     _image = d.imagePath != null ? File(d.imagePath!) : null;
   }
 
-  // ---- actions ------------------------------------------------------------
-
   Future<void> _pickPhoto() async {
     final choice = await showPhotoSourceSheet(
       context,
@@ -263,6 +262,177 @@ class ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final saved = _saved!;
+    final cs = Theme.of(context).colorScheme;
+    final pad = pagePadding(MediaQuery.of(context).size.width);
+
+    Widget refreshIndicator = RefreshIndicator(
+      color: AppColors.brandStart,
+      onRefresh: _loadProfile,
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(pad, 12, pad, 32),
+          children: [
+            Center(
+              child: ProfileAvatar(
+                name: saved.name,
+                imageFile: _image,
+                showEditBadge: _editing,
+                onEditTap: _pickPhoto,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              saved.name.isEmpty ? 'Your name' : saved.name,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              saved.email.isEmpty ? 'Add your email' : saved.email,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 14,
+                color: cs.onSurface.withAlpha(150),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            ProfileSectionCard(
+              title: 'Personal information',
+              children: [
+                ProfileField(
+                  controller: _name,
+                  label: 'Full name',
+                  icon: Icons.person_outline_rounded,
+                  editing: _editing,
+                  validator: (v) => (v == null || v.trim().length < 2)
+                      ? 'Enter your name'
+                      : null,
+                ),
+                ProfileField(
+                  controller: _email,
+                  label: 'Email',
+                  icon: Icons.mail_outline_rounded,
+                  editing: _editing,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) {
+                    final s = v?.trim() ?? '';
+                    if (s.isEmpty) return null; // optional
+                    return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s)
+                        ? null
+                        : 'Enter a valid email';
+                  },
+                ),
+                ProfileField(
+                  controller: _phone,
+                  label: 'Phone number',
+                  icon: Icons.phone_outlined,
+                  editing: _editing,
+                  keyboardType: TextInputType.phone,
+                  validator: (v) {
+                    final s = v?.trim() ?? '';
+                    if (s.isEmpty) return null; // optional
+                    return RegExp(r'^[0-9+\-\s]{7,15}$').hasMatch(s)
+                        ? null
+                        : 'Enter a valid phone number';
+                  },
+                ),
+                ProfileField(
+                  controller: _address,
+                  label: 'Address',
+                  icon: Icons.location_on_outlined,
+                  editing: _editing,
+                  maxLines: 2,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            ProfileSectionCard(
+              title: 'Investment details',
+              children: [
+                ProfileField(
+                  controller: _boid,
+                  label: 'Demat (BOID) number',
+                  icon: Icons.account_balance_outlined,
+                  editing: _editing,
+                  keyboardType: TextInputType.number,
+                  helperText: '16 digits',
+                  validator: (v) {
+                    final s = v?.trim() ?? '';
+                    if (s.isEmpty) return null; // optional
+                    return RegExp(r'^\d{16}$').hasMatch(s)
+                        ? null
+                        : 'BOID must be 16 digits';
+                  },
+                ),
+                ProfileField(
+                  controller: _memberSince,
+                  label: 'Member since',
+                  icon: Icons.event_available_outlined,
+                  editing: _editing,
+                  locked: true,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            ProfileSectionCard(
+              title: 'Appearance',
+              children: [
+                ThemeModeSelector(
+                  value: _themeMode,
+                  onChanged: (m) {
+                    setState(() => _themeMode = m);
+                    widget.onThemeChanged?.call(m);
+                  },
+                ),
+              ],
+            ),
+
+            if (_editing) ...[
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 52,
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brandStart,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: _saving ? null : _save,
+                  child: _saving
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Save changes',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
     // 1) still loading
     if (_loading) {
       return Scaffold(
@@ -315,181 +485,14 @@ class ProfilePageState extends State<ProfilePage> {
     }
 
     // 3) data is ready: _saved is safe to use from here on
-    final saved = _saved!;
-    final cs = Theme.of(context).colorScheme;
-    final pad = pagePadding(MediaQuery.of(context).size.width);
 
-    return SafeArea(
-      child: RefreshIndicator(
-        color: AppColors.brandStart,
-        onRefresh: _loadProfile,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            padding: EdgeInsets.fromLTRB(pad, 12, pad, 32),
-            children: [
-              Center(
-                child: ProfileAvatar(
-                  name: saved.name,
-                  imageFile: _image,
-                  showEditBadge: _editing,
-                  onEditTap: _pickPhoto,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                saved.name.isEmpty ? 'Your name' : saved.name,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                saved.email.isEmpty ? 'Add your email' : saved.email,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: cs.onSurface.withAlpha(150),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              ProfileSectionCard(
-                title: 'Personal information',
-                children: [
-                  ProfileField(
-                    controller: _name,
-                    label: 'Full name',
-                    icon: Icons.person_outline_rounded,
-                    editing: _editing,
-                    validator: (v) => (v == null || v.trim().length < 2)
-                        ? 'Enter your name'
-                        : null,
-                  ),
-                  ProfileField(
-                    controller: _email,
-                    label: 'Email',
-                    icon: Icons.mail_outline_rounded,
-                    editing: _editing,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (v) {
-                      final s = v?.trim() ?? '';
-                      if (s.isEmpty) return null; // optional
-                      return RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(s)
-                          ? null
-                          : 'Enter a valid email';
-                    },
-                  ),
-                  ProfileField(
-                    controller: _phone,
-                    label: 'Phone number',
-                    icon: Icons.phone_outlined,
-                    editing: _editing,
-                    keyboardType: TextInputType.phone,
-                    validator: (v) {
-                      final s = v?.trim() ?? '';
-                      if (s.isEmpty) return null; // optional
-                      return RegExp(r'^[0-9+\-\s]{7,15}$').hasMatch(s)
-                          ? null
-                          : 'Enter a valid phone number';
-                    },
-                  ),
-                  ProfileField(
-                    controller: _address,
-                    label: 'Address',
-                    icon: Icons.location_on_outlined,
-                    editing: _editing,
-                    maxLines: 2,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              ProfileSectionCard(
-                title: 'Investment details',
-                children: [
-                  ProfileField(
-                    controller: _boid,
-                    label: 'Demat (BOID) number',
-                    icon: Icons.account_balance_outlined,
-                    editing: _editing,
-                    keyboardType: TextInputType.number,
-                    helperText: '16 digits',
-                    validator: (v) {
-                      final s = v?.trim() ?? '';
-                      if (s.isEmpty) return null; // optional
-                      return RegExp(r'^\d{16}$').hasMatch(s)
-                          ? null
-                          : 'BOID must be 16 digits';
-                    },
-                  ),
-                  ProfileField(
-                    controller: _memberSince,
-                    label: 'Member since',
-                    icon: Icons.event_available_outlined,
-                    editing: _editing,
-                    locked: true,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              ProfileSectionCard(
-                title: 'Appearance',
-                children: [
-                  ThemeModeSelector(
-                    value: _themeMode,
-                    onChanged: (m) {
-                      setState(() => _themeMode = m);
-                      widget.onThemeChanged?.call(m);
-                    },
-                  ),
-                ],
-              ),
-
-              if (_editing) ...[
-                const SizedBox(height: 24),
-                SizedBox(
-                  height: 52,
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.brandStart,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: _saving ? null : _save,
-                    child: _saving
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.4,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Text(
-                            'Save changes',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
+    if (widget.showScaffold == true) {
+      return Scaffold(
+        appBar: profilepageAppbar(),
+        body: SafeArea(child: refreshIndicator),
+      );
+    } else {
+      return SafeArea(child: refreshIndicator);
+    }
   }
 }

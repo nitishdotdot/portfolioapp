@@ -51,7 +51,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void _opeProfile() {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage()));
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProfilePage(showScaffold: true)),
+    );
   }
 
   void _opeVersion() {

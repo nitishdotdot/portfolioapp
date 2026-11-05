@@ -24,20 +24,16 @@ class Homepage extends StatefulWidget {
 }
 
 var currentIndex = 0;
-String? name;
-String? email;
-String? holdings;
-double currentValue = 0;
-double profit = 0;
-double invested = 0;
-List<ScripModel> scrips = [];
-final List<Widget> pages = [
-  PortfolioPage(key: portfoliopagekey),
-  SizedBox(),
-  ProfilePage(key: profilepagekey),
-];
 
 class _HomepageState extends State<Homepage> {
+  String? name;
+  String? email;
+  String? holdings;
+  double currentValue = 0;
+  double profit = 0;
+  double invested = 0;
+  List<ScripModel> scrips = [];
+
   static const List<FloatingNavItem> _navItems = [
     FloatingNavItem(icon: Icons.pie_chart_rounded, label: 'Portfolio'),
     FloatingNavItem(icon: Icons.add_circle_rounded, label: 'Buy'),
@@ -72,6 +68,21 @@ class _HomepageState extends State<Homepage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+      PortfolioPage(
+        key: portfoliopagekey,
+        name: name,
+        email: email,
+        holdings: holdings,
+        currentValue: currentValue,
+        invested: invested,
+        profit: profit,
+        scrips: scrips,
+        getUserData: getUerData,
+      ),
+      SizedBox(),
+      ProfilePage(key: profilepagekey, showScaffold: false),
+    ];
     return Scaffold(
       appBar: (currentIndex == 0)
           ? AppBar()
@@ -81,7 +92,9 @@ class _HomepageState extends State<Homepage> {
         email: email,
         onProfile: () => Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (BuildContext context) => ProfilePage()),
+          MaterialPageRoute(
+            builder: (BuildContext context) => ProfilePage(showScaffold: true),
+          ),
         ),
         onSettings: () => Navigator.pushReplacement(
           context,
