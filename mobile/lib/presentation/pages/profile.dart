@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:portfolioapp/core/di/injection_container.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/domain/repository/user_repository.dart';
+import 'package:portfolioapp/presentation/pages/change_email.dart';
 import 'package:portfolioapp/presentation/pages/homepage.dart';
 import 'package:portfolioapp/presentation/widget/widgets.dart'; // AppColors, pagePadding
 import 'package:portfolioapp/presentation/widget/faq_widgets.dart'; // FaqStateMessage
@@ -13,7 +14,7 @@ import 'package:portfolioapp/presentation/widget/profile_widgets.dart';
 class ProfileData {
   const ProfileData({
     required this.name,
-    this.email = '',
+    required this.email,
     this.phone = '',
     this.address = '',
     this.boid = '',
@@ -83,12 +84,14 @@ class ProfilePageState extends State<ProfilePage> {
   File? _image;
 
   final _name = TextEditingController();
+  String? _imagePath;
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _address = TextEditingController();
   final _boid = TextEditingController();
-  final _memberSince = TextEditingController();
-
+  String date = DateTime.now().toUtc().toIso8601String();
+  TextEditingController _memberSince = TextEditingController();
+  String userDate = '';
   bool _editing = false;
   bool _saving = false;
 
@@ -158,13 +161,16 @@ class ProfilePageState extends State<ProfilePage> {
       // fields, add them here, e.g.  email: m.email, phone: m.phone ...
       _saved = ProfileData(
         name: m.name,
-        // email: m.email,
-        // phone: m.phone,
-        // address: m.address,
-        // boid: m.boid,
-        // memberSince: m.createdAt,
+        email: m.email,
+        phone: m.phone,
+        address: m.address,
+        boid: m.boid,
+        memberSince: m.memberSince,
+        imagePath: m.photoUrl,
       );
+
       _fillControllers();
+
       setState(() => _loading = false);
     } catch (e) {
       if (!mounted) return;
@@ -183,7 +189,9 @@ class ProfilePageState extends State<ProfilePage> {
     _address.text = d.address;
     _boid.text = d.boid;
     _memberSince.text = d.memberSince.isEmpty ? '—' : d.memberSince;
-    _image = d.imagePath != null ? File(d.imagePath!) : null;
+    userDate = _memberSince.text.split('T')[0];
+    _image = null;
+    _imagePath = d.imagePath;
   }
 
   Future<void> _pickPhoto() async {
@@ -229,7 +237,6 @@ class ProfilePageState extends State<ProfilePage> {
       imagePath: _image?.path,
       clearImage: _image == null,
     );
-
     setState(() => _saving = true);
     try {
       // TODO: call your repository update method here once it exists.
@@ -281,6 +288,7 @@ class ProfilePageState extends State<ProfilePage> {
                 name: saved.name,
                 imageFile: _image,
                 showEditBadge: _editing,
+                imagePath: _imagePath,
                 onEditTap: _pickPhoto,
               ),
             ),
@@ -321,7 +329,7 @@ class ProfilePageState extends State<ProfilePage> {
                   controller: _email,
                   label: 'Email',
                   icon: Icons.mail_outline_rounded,
-                  editing: _editing,
+                  editing: false,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
                     final s = v?.trim() ?? '';
@@ -330,6 +338,15 @@ class ProfilePageState extends State<ProfilePage> {
                         ? null
                         : 'Enter a valid email';
                   },
+                ),
+                InkWell(
+                  onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => ChangeEmail()),
+                    );
+                  },
+                  child: Text('Change email?'),
                 ),
                 ProfileField(
                   controller: _phone,
@@ -374,12 +391,27 @@ class ProfilePageState extends State<ProfilePage> {
                         : 'BOID must be 16 digits';
                   },
                 ),
-                ProfileField(
-                  controller: _memberSince,
-                  label: 'Member since',
-                  icon: Icons.event_available_outlined,
+                DatePicker(
                   editing: _editing,
-                  locked: true,
+                  memberSince: userDate,
+                  ontap: () async {
+                    final datetime =
+                        await showDatePicker(
+                          context: context,
+                          firstDate: DateTime.now().subtract(
+                            const Duration(days: 365),
+                          ),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        ) ??
+                        DateTime.now();
+                    setState(() {
+                      date = datetime.toUtc().toIso8601String();
+                      userDate = date.split('T')[0];
+                      print(date);
+                    });
+                  },
                 ),
               ],
             ),
@@ -409,7 +441,28 @@ class ProfilePageState extends State<ProfilePage> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  onPressed: _saving ? null : _save,
+                  onPressed: _saving
+                      ? null
+                      : () async {
+                          final userRepository = s1<UserRepository>();
+                          bool response = await userRepository.postUserData(
+                            _phone.text,
+                            _address.text,
+                            _boid.text,
+                            date,
+                            _image!,
+                          );
+                          if (response == true) {
+                            _saving = true;
+                            _editing = false;
+                            _fillControllers();
+                            _loadProfile();
+                          } else {
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('error')));
+                          }
+                        },
                   child: _saving
                       ? const SizedBox(
                           width: 22,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:portfolioapp/data/datasource/local/localstorage.dart';
@@ -226,6 +228,7 @@ class UserApiImpl extends UserApi {
         '${dotenv.get('BACKEND_URL')}/aboutUser',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
       );
+      print(response.data);
       final aboutUserModel = AboutUserModel.fromJson(response.data);
       return aboutUserModel;
     } catch (e) {
@@ -269,6 +272,40 @@ class UserApiImpl extends UserApi {
     } catch (e) {
       print(e.toString());
       rethrow;
+    }
+  }
+
+  @override
+  Future<bool> postUserDataApi(
+    String phone,
+    String address,
+    String boid,
+    String memberSince,
+    File? image,
+  ) async {
+    final localstorage = s1<Localstorage>();
+    String? token = await localstorage.getToken();
+    try {
+      FormData formData = FormData.fromMap({
+        'phone': phone,
+        'address': address,
+        'boid': boid,
+        'memberSince': memberSince,
+        if (image != null) 'image': await MultipartFile.fromFile(image.path),
+      });
+      final response = await dio.post(
+        '${dotenv.get('BACKEND_URL')}/postUserData',
+        data: formData,
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print(e);
+      return false;
     }
   }
 }

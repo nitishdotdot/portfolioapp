@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:portfolioapp/data/models/about_model.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
@@ -80,5 +82,22 @@ class UserRepositoryImpl extends UserRepository {
   @override
   Future<AboutModel> aboutApp() async {
     return await userApi.aboutAppApi();
+  }
+
+  @override
+  Future<bool> postUserData(
+    String phone,
+    String address,
+    String boid,
+    String memberSince,
+    File? image,
+  ) async {
+    return await userApi.postUserDataApi(
+      phone,
+      address,
+      boid,
+      memberSince,
+      image,
+    );
   }
 }

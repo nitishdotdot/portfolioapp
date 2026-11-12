@@ -20,6 +20,11 @@ model user {
   googleId String?
   photoUrl String?
   password String? 
+  phone String? @unique @db.VarChar(10)
+  Boid String? @unique @db.VarChar(16)
+  MemberSince DateTime?
+  address String?
+  
   buyscrips buyscrip[] 
   buyscriphistory buyscriphistory[]
   sellscriphistory sellscriphistory[]

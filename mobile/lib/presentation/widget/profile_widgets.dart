@@ -12,6 +12,7 @@ class ProfileAvatar extends StatelessWidget {
   const ProfileAvatar({
     super.key,
     required this.name,
+    required this.imagePath,
     this.imageFile,
     this.size = 120,
     this.showEditBadge = false,
@@ -23,6 +24,7 @@ class ProfileAvatar extends StatelessWidget {
   final double size;
   final bool showEditBadge;
   final VoidCallback? onEditTap;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +65,8 @@ class ProfileAvatar extends StatelessWidget {
               child: ClipOval(
                 child: imageFile != null
                     ? Image.file(imageFile!, fit: BoxFit.cover)
+                    : (imagePath != '')
+                    ? Image.network(imagePath!)
                     : Container(
                         alignment: Alignment.center,
                         decoration: const BoxDecoration(
@@ -295,4 +299,58 @@ Future<String?> showPhotoSourceSheet(
       ),
     ),
   );
+}
+
+class DatePicker extends StatefulWidget {
+  const DatePicker({
+    super.key,
+    required this.ontap,
+    required this.memberSince,
+    required this.editing,
+  });
+  final VoidCallback ontap;
+  final bool editing;
+  final String? memberSince;
+  @override
+  State<DatePicker> createState() => _DatePickerState();
+}
+
+class _DatePickerState extends State<DatePicker> {
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      color: cs.onSurface.withAlpha(12),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: widget.editing ? widget.ontap : () {},
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 20,
+                color: cs.onSurface.withAlpha(170),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.memberSince ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: cs.onSurface.withAlpha(120),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

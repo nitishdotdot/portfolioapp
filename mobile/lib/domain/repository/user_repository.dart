@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui';
+
 import 'package:portfolioapp/data/models/about_model.dart';
 import 'package:portfolioapp/data/models/about_user_model.dart';
 import 'package:portfolioapp/data/models/alluser_model.dart';
@@ -31,4 +34,11 @@ abstract class UserRepository {
   Future<AboutUserModel> aboutuser();
   Future<BrokerageModel> brokerage();
   Future<AboutModel> aboutApp();
+  Future<bool> postUserData(
+    String phone,
+    String address,
+    String boid,
+    String memberSince,
+    File? image,
+  );
 }
