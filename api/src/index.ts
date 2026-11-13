@@ -6,24 +6,28 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt, { decode } from "jsonwebtoken";
 import { Decimal } from "@prisma/client/runtime/client";
-import { promiseHooks } from "node:v8";
-import multer from 'multer';
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+import { error } from "console";
+
 const upload = multer({
-  dest: 'uploads/',
+  dest: "uploads/",
 });
 const app = express();
 dotenv.config();
+
 const googleAuth = new OAuth2Client(
   process.env.CLIENT_ID,
-  process.env.SERVER_ID,
+  process.env.SERVER_ID
 );
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 app.listen(process.env.PORT);
 app.use(express.json());
-async function getLtp(stockName) {
+async function getLtp(stockName: string) {
   const response = await fetch(
-    `https://sharebazaar.vercel.app/api?symbol=${stockName}`,
+    `https://sharebazaar.vercel.app/api?symbol=${stockName}`
   );
 
   if (response.status == 200) {
@@ -151,8 +155,8 @@ app.post("/buyscrip", async (req, res) => {
               const brComm = tax?.brComm as Decimal;
               const total1 =
                 data.buyprice *
-                data.kitta *
-                Number(brComm?.plus(sebComm).times(1 / 100)) +
+                  data.kitta *
+                  Number(brComm?.plus(sebComm).times(1 / 100)) +
                 data.buyprice * data.kitta;
 
               const total2 = total0.plus(total1);
@@ -189,8 +193,8 @@ app.post("/buyscrip", async (req, res) => {
           const dpCharge = tax?.dpCharge as number;
           const total1 =
             data.buyprice *
-            data.kitta *
-            Number(brComm?.plus(sebComm).times(1 / 100)) +
+              data.kitta *
+              Number(brComm?.plus(sebComm).times(1 / 100)) +
             dpCharge +
             data.buyprice * data.kitta;
           const total2 = total0.plus(total1);
@@ -225,8 +229,8 @@ app.post("/buyscrip", async (req, res) => {
         const dpCharge = tax?.dpCharge as number;
         const total =
           data.buyprice *
-          data.kitta *
-          Number(brComm?.plus(sebComm).times(1 / 100)) +
+            data.kitta *
+            Number(brComm?.plus(sebComm).times(1 / 100)) +
           dpCharge +
           data.buyprice * data.kitta;
         wacc = total / data.kitta;
@@ -304,8 +308,8 @@ app.post("/sellscrip", async (req, res) => {
               const total =
                 data.sellprice * data.kitta -
                 data.sellprice *
-                data.kitta *
-                Number(brComm?.plus(sebComm).times(1 / 100));
+                  data.kitta *
+                  Number(brComm?.plus(sebComm).times(1 / 100));
               let profit = total - Number(buyscrip!.wacc) * data.kitta;
               let day = 0;
               const cgt = await prisma.tax.findFirst({ where: { id: 1 } });
@@ -346,18 +350,18 @@ app.post("/sellscrip", async (req, res) => {
               const leftkitta = Number(buyscrip!.kitta) - data.kitta;
               leftkitta == 0
                 ? await prisma.buyscrip.deleteMany({
-                  where: { userid: (decoded as any).id, name: scripName },
-                })
+                    where: { userid: (decoded as any).id, name: scripName },
+                  })
                 : await prisma.buyscrip.update({
-                  where: {
-                    id: buyscrip?.id,
-                    userid: Number((decoded as any).id),
-                  },
-                  data: {
-                    kitta: leftkitta,
-                    total: leftkitta * Number(buyscrip!.wacc),
-                  },
-                });
+                    where: {
+                      id: buyscrip?.id,
+                      userid: Number((decoded as any).id),
+                    },
+                    data: {
+                      kitta: leftkitta,
+                      total: leftkitta * Number(buyscrip!.wacc),
+                    },
+                  });
               res.send("ok");
               return;
             }
@@ -369,8 +373,8 @@ app.post("/sellscrip", async (req, res) => {
           const total =
             data.sellprice * data.kitta -
             data.sellprice *
-            data.kitta *
-            Number(brComm?.plus(sebComm).times(1 / 100)) -
+              data.kitta *
+              Number(brComm?.plus(sebComm).times(1 / 100)) -
             dpCharge;
           let profit = total - Number(buyscrip!.wacc) * data.kitta;
           const cgt = await prisma.tax.findFirst({ where: { id: 1 } });
@@ -414,18 +418,18 @@ app.post("/sellscrip", async (req, res) => {
           const leftkitta = Number(buyscrip!.kitta) - data.kitta;
           leftkitta == 0
             ? await prisma.buyscrip.deleteMany({
-              where: { userid: (decoded as any).id, name: scripName },
-            })
+                where: { userid: (decoded as any).id, name: scripName },
+              })
             : await prisma.buyscrip.update({
-              where: {
-                id: buyscrip?.id,
-                userid: Number((decoded as any).id),
-              },
-              data: {
-                kitta: leftkitta,
-                total: leftkitta * Number(buyscrip!.wacc),
-              },
-            });
+                where: {
+                  id: buyscrip?.id,
+                  userid: Number((decoded as any).id),
+                },
+                data: {
+                  kitta: leftkitta,
+                  total: leftkitta * Number(buyscrip!.wacc),
+                },
+              });
           res.send("ok");
           return;
         }
@@ -437,8 +441,8 @@ app.post("/sellscrip", async (req, res) => {
         const total =
           data.sellprice * data.kitta -
           data.sellprice *
-          data.kitta *
-          Number(brComm?.plus(sebComm).times(1 / 100)) -
+            data.kitta *
+            Number(brComm?.plus(sebComm).times(1 / 100)) -
           dpCharge;
         const wacc = total / data.kitta;
         let profit = total - Number(buyscrip!.wacc) * data.kitta;
@@ -482,15 +486,15 @@ app.post("/sellscrip", async (req, res) => {
 
         leftkitta == 0
           ? await prisma.buyscrip.deleteMany({
-            where: { userid: (decoded as any).id, name: name },
-          })
+              where: { userid: (decoded as any).id, name: name },
+            })
           : await prisma.buyscrip.update({
-            where: { id: buyscrip?.id, userid: Number((decoded as any).id) },
-            data: {
-              kitta: leftkitta,
-              total: leftkitta * Number(buyscrip!.wacc),
-            },
-          });
+              where: { id: buyscrip?.id, userid: Number((decoded as any).id) },
+              data: {
+                kitta: leftkitta,
+                total: leftkitta * Number(buyscrip!.wacc),
+              },
+            });
         res.send("done");
       } else {
         res.status(400).send("wrong body");
@@ -542,7 +546,7 @@ app.post("/deleteuser", async (req, res) => {
     else {
       res.status(400).send("wrong-body");
     }
-  } catch (e) { }
+  } catch (e) {}
 });
 
 app.get("/user", async (req, res) => {
@@ -572,17 +576,6 @@ app.get("/user", async (req, res) => {
         },
       });
       let holding = 0;
-      // if (response!.buyscrips != null) {
-      //   const buyscriphistory = await prisma.buyscriphistory.findFirst({
-      //     where: {
-      //       userid: Number((decoded as any).id),
-      //       name: response!.buyscrips[0].name,
-      //     },
-      //   });
-
-      //   const dateDiff = Date.now() - Number(buyscriphistory!.buydatetime);
-      //   holding = Math.floor(dateDiff / (3600000 * 24));
-      // }
       response?.buyscrips.map(async (i) => {
         const buyscriphistory = await prisma.buyscriphistory.findFirst({
           where: {
@@ -605,8 +598,8 @@ app.get("/user", async (req, res) => {
             const total =
               ltp * buyscrip.kitta -
               ltp *
-              buyscrip.kitta *
-              Number(brComm?.plus(sebComm).times(1 / 100)) -
+                buyscrip.kitta *
+                Number(brComm?.plus(sebComm).times(1 / 100)) -
               Number(tax?.dpCharge);
             const companyName = company_name ?? "";
             const invested = Number(buyscrip.total);
@@ -620,7 +613,7 @@ app.get("/user", async (req, res) => {
               invested,
               holding,
             };
-          }),
+          })
         ),
       };
 
@@ -825,7 +818,15 @@ app.get("/aboutUser", async (req, res) => {
     try {
       const response = await prisma.user.findUnique({
         where: { email: email },
-        select: { name: true, email: true, phone: true, address: true, Boid: true, MemberSince: true, photoUrl: true },
+        select: {
+          name: true,
+          email: true,
+          phone: true,
+          address: true,
+          Boid: true,
+          MemberSince: true,
+          photoUrl: true,
+        },
       });
       res.send(response);
     } catch (e) {
@@ -900,7 +901,7 @@ app.get("/alluser", async (req, res) => {
     res.status(400).send("invalid token");
   }
 });
-app.post("/postUserData", upload.single('image'), async (req, res) => {
+app.post("/postUserData", upload.single("image"), async (req, res) => {
   try {
     const header = req.headers["authorization"];
     if (header == null) {
@@ -910,17 +911,39 @@ app.post("/postUserData", upload.single('image'), async (req, res) => {
     const token = header.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET!.toString());
     const data = req.body;
+    let imageUrl = "";
     console.log(data);
+    try {
+      if (req.file != null) {
+        cloudinary.config({
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_SECRET,
+        });
+        const cRes = await cloudinary.uploader.upload(`./${req.file?.path}`);
+        imageUrl = cRes.secure_url;
+        console.log(cRes);
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      fs.unlink(req.file!.path, (error) => {
+        console.log("error on delete:", error);
+      });
+    }
+    console.log(imageUrl);
     const dbresponse = await prisma.user.update({
       where: { id: Number((decoded as any).id) },
       data: {
         phone: data.phone,
-        address: data.address, MemberSince: data.memberSince, Boid: data.boid
-      }
+        address: data.address,
+        MemberSince: data.memberSince,
+        Boid: data.boid,
+        ...(imageUrl == "" ? {} : { photoUrl: imageUrl }),
+      },
     });
     res.send(dbresponse);
-  }
-  catch (e) {
+  } catch (e) {
     res.status(400).send("invalid token");
   }
 });

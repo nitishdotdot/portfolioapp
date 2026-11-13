@@ -10,7 +10,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@12.4.1",
+  "packageManager": "pnpm@12.18.0",
   "devDependencies": {
     "@prisma/adapter-pg": "^7.9.1",
     "@types/bcrypt": "^6.0.0",
@@ -24,10 +24,13 @@
   },
   "dependencies": {
     "@prisma/client": "^7.9.1",
+    "@types/multer": "^2.3.0",
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.11.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "google-auth-library": "^11.0.2",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.5.0"
   }
 }
